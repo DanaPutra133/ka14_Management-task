@@ -1,7 +1,7 @@
 node_modules
 package-lock.json
-/database/
-database/
+/database/tugas-mhs.json
+/database/status-dosen.json
 apikeys.json
 DB_allert/reminders_db.json
 logs.json
