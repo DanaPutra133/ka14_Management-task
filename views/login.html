@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* Definisi variabel warna untuk tema terang */
+        :root {
+            --primary-color: #007bff;
+            --background-color: #f3f4f6; /* Warna background body saat terang */
+            --text-color: #333333;
+            --card-bg: #ffffff; /* Background card login saat terang */
+            --input-bg: #ffffff;
+            --input-border: #d1d5db;
+        }
+
+        /* Definisi variabel warna untuk tema gelap */
+        body.dark-theme {
+            --primary-color: #0056b3;
+            --background-color: #1a202c; /* Warna background body saat gelap, lebih gelap dari background-image */
+            --text-color: #e2e8f0; /* Teks terang untuk dark mode */
+            --card-bg: #2d3748; /* Background card login saat gelap */
+            --input-bg: #4a5568;
+            --input-border: #4a5568;
+        }
+
+        body {
+            font-family: sans-serif; /* Tailwind default */
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color); /* Atur warna background body dari variabel */
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease; /* Transisi warna background dan teks */
+            overflow: hidden; /* Pastikan tidak ada scrollbar dari background, terutama yang horizontal */
+        }
+
+        /* Gaya untuk container background */
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1; /* Pastikan di belakang semua konten */
+            /* Tambahkan background-color untuk menutupi tepi putih dan sebagai fallback */
+            background-color: var(--background-color); /* Menggunakan warna background body */
+        }
+
+        .background-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Menjaga rasio 16:9 dan mengisi area */
+            filter: blur(5px); /* Efek blur (sesuaikan nilainya) */
+            transform: scale(1.05); /* Sedikit memperbesar untuk menghindari tepi blur */
+            opacity: 0.6; /* Transparansi (sesuaikan nilainya) */
+            /* Tambahkan transisi opacity agar lebih mulus saat dark mode */
+            transition: opacity 0.3s ease;
+        }
+
+        /* Mengatur opacity gambar background saat dark mode */
+        body.dark-theme .background-image {
+            opacity: 0.3; /* Lebih gelap saat dark mode, sesuaikan */
+        }
+
+
+        /* Gaya untuk toggle dark mode */
+        .dark-mode-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem; /* Posisi default di kanan atas */
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 1000; /* Pastikan di atas konten lain */
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 30px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 24px;
+            width: 24px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
+        .slider .icon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+        }
+
+        .slider .icon.sun {
+            left: 8px;
+            color: #f1c40f; /* Yellow for the sun */
+        }
+
+        .slider .icon.moon {
+            right: 8px;
+            color: #888; /* Gray for the moon */
+        }
+
+        /* Gaya untuk form login */
+        .login-card {
+            background-color: var(--card-bg); /* Gunakan variabel untuk dark mode */
+            position: relative; /* Penting agar card di atas background */
+            z-index: 1; /* Pastikan di atas background (-1) */
+            transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease; /* Transisi untuk card */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08); /* Shadow yang lebih halus */
+        }
+
+        /* Teks dalam card, diatur dengan Tailwind tapi kita bisa override/pastikan */
+        .login-card h1 {
+            color: var(--text-color); /* Menggunakan variabel teks */
+        }
+
+        .login-card label {
+            color: var(--text-color); /* Menggunakan variabel teks */
+        }
+
+        .login-card p {
+            color: var(--text-color); /* Menggunakan variabel teks */
+        }
+
+        /* Input field styles */
+        .login-card input[type="text"] {
+            background-color: var(--input-bg);
+            border-color: var(--input-border);
+            color: var(--text-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Button styles */
+        .login-card button[type="submit"] {
+            background-color: var(--primary-color);
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        body.dark-theme .login-card button[type="submit"] {
+            background-color: var(--primary-color); /* Pastikan warna primary dark mode */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+
+    <div class="background-container">
+        <img src="./background/background.png" alt="Background Wallpaper" class="background-image">
+    </div>
+
+    <div class="dark-mode-toggle">
+        <label class="toggle-switch">
+            <input type="checkbox" id="darkModeSwitch">
+            <span class="slider">
+                <i class="icon sun">☀</i>
+                <i class="icon moon">🌙</i>
+            </span>
+        </label>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-sm login-card">
+        <h1 class="text-xl font-bold mb-4 text-center">LOGIN TUGAS</h1>
+        <form id="loginForm">
+            <div class="mb-4">
+                <label for="npm" class="block text-sm font-medium">Masukan Pin:</label>
+                <input type="text" id="npm" required class="mt-1 block w-full border rounded-md shadow-sm focus:ring focus:ring-blue-500">
+            </div>
+            <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600">Login</button>
+        </form>
+    </div>
+
+    <script>
+        // Dark Mode Toggle Logic
+        const darkModeSwitch = document.getElementById("darkModeSwitch");
+        const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+
+        // Set initial state based on saved preference
+        darkModeSwitch.checked = savedDarkMode;
+        document.body.classList.toggle("dark-theme", savedDarkMode);
+
+        // Add event listener for toggle
+        darkModeSwitch.addEventListener("change", () => {
+            const isDarkMode = darkModeSwitch.checked;
+            document.body.classList.toggle("dark-theme", isDarkMode);
+            localStorage.setItem('darkMode', isDarkMode);
+        });
+
+        // Login Form Logic
+        const form = document.getElementById('loginForm');
+        let loginAttempts = 0; // Track the number of failed login attempts
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const npm = document.getElementById('npm').value;
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ npm })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) { // Periksa response.ok juga untuk status HTTP 200
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Login Berhasil',
+                        text: 'Kamu bakal masuk ke halaman manajemen tugas.',
+                        imageUrl: './img/Good.jpg',
+                        imageAlt: 'Success Image',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = result.redirect;
+                    });
+                } else {
+                    loginAttempts++; 
+                    const errorImages = [
+                        '/img/error1.jpg',
+                        '/img/error2.jpg',
+                        '/img/error3.jpeg',
+                        '/img/error4.jpg'
+                    ];
+                    const errorImage = errorImages[(loginAttempts - 1) % errorImages.length]; // ngulang ngulang gambar
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Login Gagal',
+                        text: result.message || 'Pin tidak valid atau terjadi kesalahan.', // Pesan default jika result.message kosong
+                        imageUrl: errorImage,
+                        imageAlt: 'Error Image'
+                    });
+                }
+            } catch (error) {
+                console.error("Error during login fetch:", error); // Log error untuk debugging
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    title: 'Error',
+                    text: 'Terjadi kesalahan saat login. Silakan coba lagi.'
+                });
+            }
+        });
+    </script>
+</body>
+</html>

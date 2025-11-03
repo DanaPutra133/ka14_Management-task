@@ -1,0 +1,7 @@
+node_modules
+package-lock.json
+/database/
+database/
+apikeys.json
+DB_allert/reminders_db.json
+logs.json

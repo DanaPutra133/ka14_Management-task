@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Tugas Mahasiswa</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="./img/splash1.png">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        :root {
+            --bg-default: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-default: #111827;
+            --muted-text: #4b5563;
+            --table-bg: #ffffff;
+            --table-border: #e5e7eb;
+            --hover-row: #f3f4f6;
+            --input-bg: #ffffff;
+            --input-border: #d1d5db;
+            --btn-primary: #2563eb;
+            --btn-danger: #dc2626;
+            --thead-bg: rgba(229,231,235,0.9);
+        }
+        
+        body.dark-theme {
+            --bg-default: #071022;
+            --card-bg: #0b1220;
+            --text-default: #e6eef8;
+            --muted-text: #9aa9bf;
+            --table-bg: #071022;
+            --table-border: #1f2937;
+            --hover-row: rgba(255,255,255,0.03);
+            --input-bg: rgba(255,255,255,0.02);
+            --input-border: #24303b;
+            --btn-primary: #1e40af;
+            --btn-danger: #b91c1c;
+            --thead-bg: rgba(255,255,255,0.03);
+        }
+
+        body {
+            background-color: var(--bg-default);
+            color: var(--text-default);
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        .card-bg-override {
+            background-color: var(--card-bg) !important;
+            color: var(--text-default);
+        }
+
+        .dark-mode-toggle { position: fixed; top: 1rem; right: 1rem; display:flex; gap:.5rem; z-index:1000; }
+        .toggle-switch { position: relative; width: 56px; height: 28px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-switch .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #6b7280; transition: .3s; border-radius: 999px;
+        }
+        .toggle-switch .slider:before {
+            content:""; position:absolute; height:22px; width:22px; left:3px; bottom:3px;
+            background-color: #fff; transition:.3s; border-radius:50%;
+        }
+        .toggle-switch input:checked + .slider { background-color: var(--btn-primary); }
+        .toggle-switch input:checked + .slider:before { transform: translateX(28px); }
+
+        body.dark-theme .bg-white { background-color: var(--card-bg) !important; }
+        body.dark-theme .bg-gray-100 { background-color: var(--card-bg) !important; }
+        body.dark-theme .bg-gray-200 { background-color: var(--thead-bg) !important; }
+        body.dark-theme .text-gray-700, body.dark-theme .text-gray-600 {
+            color: var(--muted-text) !important;
+        }
+        body.dark-theme .border-gray-300, body.dark-theme .border-gray-200 {
+            border-color: var(--table-border) !important;
+        }
+
+        label {
+            font-family: "Montserrat", sans-serif;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: block;
+            position: relative;
+        }
+
+        label > input {
+            display: none;
+        }
+
+        label span {
+            color: #6A759B;
+            margin-left: 10px;
+        }
+
+        label i {
+            display: inline-block;
+            width: 44px;
+            height: 20px;
+            border-radius: 20px;
+            vertical-align: middle;
+            transition: .25s .09s;
+            position: relative;
+            background: #deeff7;
+        }
+
+        label i::after {
+            content: "";
+            display: block;
+            width: 20px;
+            height: 20px;
+            top: 0.1px;
+            left: 1px;
+            border-radius: 50%;
+            background: #fff;
+            position: absolute;
+            box-shadow: 1px 2px 4px 0 rgba(0, 0, 0, .4);
+            transition: .15s;
+        }
+
+        /* Checked State */
+        label > input:checked + i {
+            background: #1094fb;
+        }
+
+        label > input:checked + i + span {
+            color: #29316b;
+        }
+
+        label > input:checked + i::after {
+            transform: translateX(25px);
+        }
+        ody.dark-theme th,
+body.dark-theme td,
+body.dark-theme tr {
+    background-color: var(--table-bg) !important;
+    color: var(--text-default) !important;
+    border-color: var(--table-border) !important;
+}
+
+body.dark-theme tr {
+    border-bottom: 1px solid var(--table-border) !important;
+}
+
+body.dark-theme tr:hover {
+    background-color: var(--hover-row) !important;
+}
+
+body.dark-theme .bg-white {
+    background-color: var(--card-bg) !important;
+    color: var(--text-default) !important;
+}
+
+body.dark-theme .border-gray-300, 
+body.dark-theme .border-gray-200 {
+    border-color: var(--table-border) !important;
+}
+    </style>
+</head>
+<body>
+    <div class="dark-mode-toggle" title="Toggle dark mode">
+        <label class="toggle-switch">
+            <input type="checkbox" id="darkModeSwitch">
+            <span class="slider" aria-hidden="true"></span>
+        </label>
+    </div>
+    <div class="w-full max-w-full mx-auto p-4 sm:p-6 lg:p-8 bg-white rounded-lg shadow-md">
+        <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold mb-4 text-center">Manajemen Tugas Mahasiswa</h1>
+        <h2><strong>Penanggung Jawab </strong></h2>
+            <br/>
+            <ul>
+                <li><strong>- Kelas 3KA14</strong></li>
+            </ul>
+        <div class="overflow-x-auto">
+            <fieldset class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                <label>
+                    <input class="cb cb1" id="filterKelompok" type="checkbox" name="kelompok" />
+                    <i></i>
+                    <span>Kelompok</span>
+                </label>
+                <label>
+                    <input class="cb cb2" id="filterVclass" type="checkbox" name="vclass" />
+                    <i></i>
+                    <span>VClass</span>
+                </label>
+                <label>
+                    <input class="cb cb3" id="filterPraktikum" type="checkbox" name="praktikum" />
+                    <i></i>
+                    <span>Praktikum</span>
+                </label>
+                <label>
+                    <input class="cb cb4" id="filterIlab" type="checkbox" name="ilab" />
+                    <i></i>
+                    <span>iLab</span>
+                </label>
+                <label>
+                    <input class="cb cb4" id="filterMandiri" type="checkbox" name="Mandiri" />
+                    <i></i>
+                    <span>Mandiri</span>
+                </label>
+            </fieldset>
+            <table class="w-full bg-white border border-gray-300 text-sm sm:text-base">
+                <thead>
+                    <tr class="bg-gray-200 text-gray-600 uppercase text-xs sm:text-sm leading-normal">
+                        <th class="py-2 px-4 sm:py-3 sm:px-6 text-left">Mata Kuliah</th>
+                        <th class="py-2 px-4 sm:py-3 sm:px-6 text-left">Nama Tugas</th>
+                        <th class="py-2 px-4 sm:py-3 sm:px-6 text-left">Deadline<br>Tahun-Bulan-Tanggal</th>
+                        <th class="py-2 px-4 sm:py-3 sm:px-6 text-left">Kelompok</th>
+                        <th class="py-2 px-4 sm:py-3 sm:px-6 text-left">VClass</th>
+                        <th class="py-2 px-4 sm:py-3 sm:px-6 text-left">Praktikum</th>
+                        <th class="py-2 px-4 sm:py-3 sm:px-6 text-left">iLab</th>
+                        <th class="py-2 px-4 sm:py-3 sm:px-6 text-left">Mandiri</th>
+                    </tr>
+                </thead>
+                <tbody id="tugasList" class="text-gray-600 text-xs sm:text-sm font-light">
+                    <!-- Tugas akan ditampilkan di sini -->
+                </tbody>
+            </table>
+
+            <!-- Div buat laporan kalau user mau nambah / chat dev -->
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-700 mb-2">Ada yang salah? atau ingin menambahkan? Bisa klik ini:</p>
+                <td>
+                    <button class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded shadow-md transition" onclick="Login('/login')">Login</button>
+                </td>
+                <p class="text-sm text-gray-700 mt-4">
+                    Jika ada kendala, bisa chat dengan developer:
+                    <a href="https://wa.me/6281289694906" target="_blank" class="text-green-600 underline ml-1">
+                        Klik untuk WhatsApp
+                    </a>
+                </p>
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+
+        
+        function Login(endpoint) {
+            window.open(endpoint, '_blank');
+        }
+
+        const tugasList = document.getElementById('tugasList');
+        const filterKelompok = document.getElementById('filterKelompok');
+        const filterVclass = document.getElementById('filterVclass');
+        const filterPraktikum = document.getElementById('filterPraktikum');
+        const filterIlab = document.getElementById('filterIlab');
+        const filterMandiri = document.getElementById('filterMandiri');
+        let allTugas = []; // Store all tasks for filtering
+
+        // Load tugas data
+        async function loadTugas() {
+            try {
+                const response = await fetch('/tugas/mahasiswa');
+                const data = await response.json();
+                allTugas = data.tugas || []; // Store all tasks
+                applyFilters(); // Apply filters after loading
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Gagal memuat data tugas!'
+                });
+                allTugas = []; // Initialize empty array
+                applyFilters();
+            }
+        }
+
+        // Apply filters to the table
+        function applyFilters() {
+            const filteredTugas = allTugas.filter(t => {
+                const kelompokFilter = !filterKelompok.checked || t.kelompok;
+                const vclassFilter = !filterVclass.checked || t.vclass;
+                const praktikumFilter = !filterPraktikum.checked || t.praktikum;
+                const ilabFilter = !filterIlab.checked || t.ilab;
+                const MandiriFilter = !filterMandiri.checked || t.Mandiri;
+                return kelompokFilter && vclassFilter && praktikumFilter && ilabFilter && MandiriFilter;
+            });
+            displayTugas(filteredTugas);
+        }
+
+        // Display tugas in the table
+        function displayTugas(tugas) {
+            const getSelectedFilter = () => {
+                if (filterKelompok.checked) return "Kelompok";
+                if (filterVclass.checked) return "VClass";
+                if (filterPraktikum.checked) return "Praktikum";
+                if (filterIlab.checked) return "iLab";
+                if (filterMandiri.checked) return "Mandiri";
+                return "";
+            };
+
+            tugas.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+            const selectedFilter = getSelectedFilter();
+            const noTaskMessage = selectedFilter 
+                ? `Tidak ada tugas ${selectedFilter}` 
+                : 'Tidak ada tugas';
+
+            tugasList.innerHTML = tugas.length === 0 ? 
+                `<tr><td colspan="8" class="py-3 px-6 text-center">${noTaskMessage}</td></tr>` :
+                tugas.map(t => `
+                    <tr class="border-b hover:bg-gray-100">
+                        <td class="py-3 px-6">${t.matakuliah}</td>
+                        <td class="py-3 px-6">${t.Namatugas}</td>
+                        <td class="py-3 px-6">${t.deadline}</td>
+                        <td class="py-3 px-6">${t.kelompok ? 'Ya' : 'Tidak'}</td>
+                        <td class="py-3 px-6">${t.vclass ? 'Ya' : 'Tidak'}</td>
+                        <td class="py-3 px-6">${t.praktikum ? 'Ya' : 'Tidak'}</td>
+                        <td class="py-3 px-6">${t.ilab ? 'Ya' : 'Tidak'}</td>
+                        <td class="py-3 px-6">${t.Mandiri ? 'Ya' : 'Tidak'}</td>
+                    </tr>
+                `).join('');
+        }
+
+        // user cuma bisa 1 isi aja
+        [filterKelompok, filterVclass, filterPraktikum, filterIlab, filterMandiri].forEach(filter => {
+            filter.addEventListener('change', (event) => {
+                if (event.target.checked) {
+                    [filterKelompok, filterVclass, filterPraktikum, filterIlab, filterMandiri].forEach(otherFilter => {
+                        if (otherFilter !== event.target) {
+                            otherFilter.checked = false;
+                        }
+                    });
+                }
+                applyFilters();
+            });
+        });
+
+        (function() {
+            const darkModeSwitch = document.getElementById('darkModeSwitch');
+            if (!darkModeSwitch) return;
+
+            const saved = localStorage.getItem('darkMode');
+            const isDark = saved === 'true';
+
+            document.body.classList.toggle('dark-theme', isDark);
+            darkModeSwitch.checked = isDark;
+
+            darkModeSwitch.addEventListener('change', function() {
+                document.body.classList.toggle('dark-theme', darkModeSwitch.checked);
+                localStorage.setItem('darkMode', darkModeSwitch.checked);
+            });
+        })();
+
+        loadTugas();
+    </script>
+</body>
+</html>

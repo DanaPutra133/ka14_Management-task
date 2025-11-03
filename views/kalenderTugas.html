@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalender Tugas Mahasiswa</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="./img/splash1.png">
+    <style>
+        :root {
+            --bg-default: #071022;
+            --card-bg: #0b1220;
+            --text-default: #e6eef8;
+            --muted-text: #9aa9bf;
+            --calendar-border: #1f2937;
+            --calendar-today: #1e40af;
+            --calendar-event: #60a5fa;
+            --calendar-hover: rgba(255,255,255,0.03);
+        }
+
+        body {
+            background-color: var(--bg-default);
+            color: var(--text-default);
+        }
+
+        .calendar-container {
+            background-color: var(--card-bg);
+            border-color: var(--calendar-border);
+        }
+
+        .calendar-day {
+            border-color: var(--calendar-border);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .calendar-day.today {
+            background-color: var(--calendar-today);
+        }
+
+        .task-dot {
+            width: 8px;
+            height: 8px;
+            margin: 2px;
+            transition: transform 0.2s ease;
+        }
+
+        .task-dot:hover {
+            transform: scale(1.5);
+        }
+
+        .task-kelompok { background-color: #f59e0b; }
+        .task-vclass { background-color: #10b981; }
+        .task-praktikum { background-color: #3b82f6; }
+        .task-ilab { background-color: #8b5cf6; }
+        .task-mandiri { background-color: #ef4444; }
+
+        .task-tooltip {
+            visibility: hidden;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--card-bg);
+            border: 1px solid var(--calendar-border);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            width: max-content;
+            max-width: 300px;
+            z-index: 50;
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+
+        .calendar-day:hover .task-tooltip {
+            visibility: visible;
+            opacity: 1;
+            bottom: 110%;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translate(-50%, -45%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+
+        @keyframes overlayFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .task-preview {
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) scale(0.95);
+            opacity: 0;
+            transition: all 0.3s ease;
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            border-radius: 1rem;
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 100;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .task-preview.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .task-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .task-overlay.show {
+            opacity: 1;
+        }
+
+        .task-card {
+            background: #1e293b;
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            transition: transform 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .task-card:hover {
+            transform: translateX(5px);
+        }
+
+        .close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #374151;
+            border: none;
+            color: #e5e7eb;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .close-button:hover {
+            background: #4b5563;
+            transform: rotate(90deg);
+        }
+
+        .calendar-day {
+            background: #1e293b;
+            border-color: #374151;
+            transition: all 0.2s ease;
+        }
+
+        .calendar-day:hover {
+            background: #2d3748;
+            transform: translateY(-2px);
+        }
+
+        .calendar-day.today {
+            background: #1e40af;
+            color: white;
+        }
+
+        .task-indicator {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            color: white;
+            display: inline-block;
+            margin: 0.25rem;
+            background-color: inherit; 
+        }
+
+        .indicator-kelompok { background: #f59e0b !important; }
+        .indicator-vclass { background: #10b981 !important; }
+        .indicator-praktikum { background: #3b82f6 !important; }
+        .indicator-ilab { background: #8b5cf6 !important; }
+        .indicator-mandiri { background: #ef4444 !important; }
+
+        .legend-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            background-color: inherit; 
+        }
+
+        .task-kelompok { background-color: #f59e0b; }
+        .task-vclass { background-color: #10b981; }
+        .task-praktikum { background-color: #3b82f6; }
+        .task-ilab { background-color: #8b5cf6; }
+        .task-mandiri { background-color: #ef4444; }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-8">
+        <div class="calendar-container rounded-lg shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold" id="currentMonth"></h1>
+                <div class="flex gap-2">
+                    <button onclick="changeMonth(-1)" class="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 transition">Previous</button>
+                    <button onclick="changeMonth(1)" class="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 transition">Next</button>
+                </div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-dot task-kelompok"></div>
+                    <span>Kelompok</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot task-vclass"></div>
+                    <span>VClass</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot task-praktikum"></div>
+                    <span>Praktikum</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot task-ilab"></div>
+                    <span>iLab</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot task-mandiri"></div>
+                    <span>Mandiri</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-7 gap-2 mb-2 text-center">
+                <div class="font-semibold">Sun</div>
+                <div class="font-semibold">Mon</div>
+                <div class="font-semibold">Tue</div>
+                <div class="font-semibold">Wed</div>
+                <div class="font-semibold">Thu</div>
+                <div class="font-semibold">Fri</div>
+                <div class="font-semibold">Sat</div>
+            </div>
+
+            <div id="calendar" class="grid grid-cols-7 gap-2"></div>
+        </div>
+
+        <div id="taskPreview" class="task-preview mt-6 p-4 rounded-lg shadow hidden"></div>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+        let allTasks = [];
+
+        async function loadTasks() {
+            try {
+                const response = await fetch('/tugas/mahasiswa');
+                const data = await response.json();
+                allTasks = data.tugas || [];
+                renderCalendar();
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+                allTasks = [];
+                renderCalendar();
+            }
+        }
+
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            
+            document.getElementById('currentMonth').textContent = 
+                new Date(year, month).toLocaleString('default', { month: 'long', year: 'numeric' });
+            
+            const calendar = document.getElementById('calendar');
+            calendar.innerHTML = '';
+            
+            for (let i = 0; i < firstDay.getDay(); i++) {
+                calendar.appendChild(createEmptyDay());
+            }
+            
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const date = new Date(year, month, day);
+                const dateString = date.toLocaleDateString('en-CA'); 
+
+                const dayTasks = allTasks.filter(task => task.deadline === dateString);
+
+                calendar.appendChild(createCalendarDay(day, date, dayTasks));
+            }
+        }
+
+        function createEmptyDay() {
+            const div = document.createElement('div');
+            div.className = 'calendar-day h-24 border rounded-lg';
+            return div;
+        }
+
+        function createCalendarDay(day, date, tasks) {
+            const div = document.createElement('div');
+            const isToday = isSameDate(date, new Date());
+            
+            div.className = `calendar-day h-24 border rounded-lg p-2 ${isToday ? 'today' : ''} relative`;
+            
+            let tooltipContent = tasks.length > 0 ? 
+                `<div class="task-tooltip">
+                    ${tasks.map(task => `
+                        <div class="mb-2">
+                            <strong>${task.matakuliah}</strong><br>
+                            ${task.Namatugas}
+                        </div>
+                    `).join('')}
+                </div>` : '';
+            
+            div.innerHTML = `
+                <div class="font-semibold">${day}</div>
+                ${tooltipContent}
+                ${tasks.length > 0 ? `
+                    <div class="absolute bottom-2 right-2 flex flex-wrap gap-1">
+                        ${tasks.map(task => {
+                            const classes = [];
+                            if (task.kelompok) classes.push('task-kelompok');
+                            if (task.vclass) classes.push('task-vclass');
+                            if (task.praktikum) classes.push('task-praktikum');
+                            if (task.ilab) classes.push('task-ilab');
+                            if (task.Mandiri) classes.push('task-mandiri');
+                            return `<div class="task-dot w-2 h-2 rounded-full ${classes.join(' ')}" 
+                                title="${task.matakuliah}: ${task.Namatugas}"></div>`;
+                        }).join('')}
+                    </div>
+                ` : ''}
+            `;
+
+            if (tasks.length > 0) {
+                div.addEventListener('click', () => showTaskPreview(tasks, date));
+            }
+
+            return div;
+        }
+
+        function showTaskPreview(tasks, date) {
+            const overlay = document.createElement('div');
+            overlay.className = 'task-overlay';
+            document.body.appendChild(overlay);
+
+            const preview = document.createElement('div');
+            preview.className = 'task-preview';
+            
+            preview.innerHTML = `
+                <button class="close-button">&times;</button>
+                <h3 class="text-xl font-bold mb-6">${date.toLocaleDateString('id-ID', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                })}</h3>
+                <div class="space-y-4">
+                    ${tasks.map(task => `
+                        <div class="task-card">
+                            <h4 class="text-lg font-semibold mb-2">${task.matakuliah}</h4>
+                            <p class="mb-3 text-gray-300">${task.Namatugas}</p>
+                            <div class="flex flex-wrap gap-2">
+                                ${task.kelompok ? '<span class="task-indicator indicator-kelompok">Kelompok</span>' : ''}
+                                ${task.vclass ? '<span class="task-indicator indicator-vclass">VClass</span>' : ''}
+                                ${task.praktikum ? '<span class="task-indicator indicator-praktikum">Praktikum</span>' : ''}
+                                ${task.ilab ? '<span class="task-indicator indicator-ilab">iLab</span>' : ''}
+                                ${task.Mandiri ? '<span class="task-indicator indicator-mandiri">Mandiri</span>' : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            document.body.appendChild(preview);
+
+            requestAnimationFrame(() => {
+                overlay.classList.add('show');
+                preview.classList.add('show');
+            });
+
+            const closeModal = () => {
+                overlay.classList.remove('show');
+                preview.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(overlay);
+                    document.body.removeChild(preview);
+                }, 300);
+            };
+
+            overlay.addEventListener('click', closeModal);
+            preview.querySelector('.close-button').addEventListener('click', closeModal);
+        }
+
+        function isSameDate(date1, date2) {
+            return date1.getDate() === date2.getDate() &&
+                   date1.getMonth() === date2.getMonth() &&
+                   date1.getFullYear() === date2.getFullYear();
+        }
+
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            renderCalendar();
+        }
+
+        loadTasks();
+    </script>
+</body>
+</html>

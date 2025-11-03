@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Status Dosen</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="./img/splash1.png">
+   <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+     
+    <div class="w-full max-w-full mx-auto p-4 sm:p-6 lg:p-8 bg-white rounded-lg shadow-md">
+        <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold mb-4 text-center">Manajemen Status Dosen</h1>
+        <div class="contributor-section" data-aos="fade-up" data-aos-duration="3000">
+            <h2><strong>Penanggung Jawab Kelas</strong></h2>
+            <br/>
+            <ul>
+                <li><strong>Daffa</strong> - Ketua Kelas</li>
+                <li><strong>Abu Bakar</strong> - Statistika</li>
+                <li><strong>Bimo</strong> - Pemrograman Berotientasi Objek</li>
+            </ul>
+            <br/>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full bg-white border border-gray-300 text-sm sm:text-base">
+                <thead>
+                    <tr class="bg-gray-200 text-gray-600 uppercase text-xs sm:text-sm leading-normal">
+                        <th class="py-2 px-4 sm:py-3 sm:px-6 text-left">Mata Kuliah</th>
+                        <th class="py-2 px-4 sm:py-3 sm:px-6 text-left">Kelas</th>
+                        <th class="py-2 px-4 sm:py-3 sm:px-6 text-left">Jam Matkul Masuk</th>
+                        <th class="py-2 px-4 sm:py-3 sm:px-6 text-left">Link Gmeet</th>
+                        <th class="py-2 px-4 sm:py-3 sm:px-6 text-left">Tanggal Masuk</th>
+                        <th class="py-2 px-4 sm:py-3 sm:px-6 text-left">VClass</th>
+                        <th class="py-2 px-4 sm:py-3 sm:px-6 text-left">Gmeet</th>
+                        <th class="py-2 px-4 sm:py-3 sm:px-6 text-left">Offline</th>
+                    </tr>
+                </thead>
+                <tbody id="tugasList" class="text-gray-600 text-xs sm:text-sm font-light">
+                    <!-- Data tugas akan ditampilkan di sini -->
+                </tbody>
+            </table>
+                        <!-- Div buat laporan kalau user mau nambah / chat dev -->
+
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-700 mb-2">Ada yang salah? atau ingin menambahkan? Bisa klik ini:</p>
+                <td>
+                    <button class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded shadow-md transition" onclick="Login('/logindosen')">Login</button>
+                </td>
+                <p class="text-sm text-gray-700 mt-4">
+                    Jika ada kendala, bisa chat dengan developer:
+                    <a href="https://wa.me/6281289694906" target="_blank" class="text-green-600 underline ml-1">
+                        Klik untuk WhatsApp
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        function Login(endpoint) {
+            window.open(endpoint, '_blank');
+        }
+        const tugasList = document.getElementById('tugasList');
+
+        // Load tugas data
+        async function loadTugas() {
+            try {
+                const response = await fetch('/tugas/dosen');
+                const data = await response.json();
+                displayTugas(data.tugas || []); // Add fallback empty array
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Gagal memuat data tugas!'
+                });
+                // Initialize empty table if error
+                displayTugas([]);
+            }
+        }
+
+        // Display tugas in the table
+        function displayTugas(tugas) {
+            if (!Array.isArray(tugas)) {
+                tugas = [];
+            }
+
+            tugas.sort((a, b) => new Date(a.TanggalMasuk) - new Date(b.TanggalMasuk));
+            
+            tugasList.innerHTML = tugas.length === 0 ? 
+                '<tr><td colspan="8" class="py-3 px-6 text-center">Tidak ada Status dosen, Tunggu PJ ngabarin</td></tr>' :
+                tugas.map(t => `
+                    <tr class="border-b hover:bg-gray-100">
+                        <td class="py-3 px-6">${t.matakuliah}</td>
+                        <td class="py-3 px-6">${t.Kelas}</td>
+                        <td class="py-3 px-6">${t.Jam}</td>
+                        <td class="py-3 px-6">${t.LinkGmeet}</td>
+                        <td class="py-3 px-6">${t.TanggalMasuk}</td>
+                        <td class="py-3 px-6">${t.vclass ? 'Ya' : 'Tidak'}</td>
+                        <td class="py-3 px-6">${t.Gmeet ? 'Ya' : 'Tidak'}</td>
+                        <td class="py-3 px-6">${t.offline ? 'Ya' : 'Tidak'}</td>
+                    </tr>
+                `).join('');
+        }
+        loadTugas();
+    </script>
+</body>
+</html>
+
+<!-- end -->
