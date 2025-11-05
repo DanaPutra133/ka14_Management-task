@@ -275,7 +275,7 @@
             try {
                 const response = await fetch('/tugas/mahasiswa');
                 const data = await response.json();
-                allTasks = data.tugas || [];
+                allTasks = data || [];
                 renderCalendar();
             } catch (error) {
                 console.error('Error loading tasks:', error);

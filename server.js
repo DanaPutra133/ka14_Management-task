@@ -8,6 +8,7 @@ const cron = require('node-cron');
 const cronService = require('./services/cronService');
 const session = require('express-session');
 const fs = require('fs');
+const webpush = require('web-push');
 
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
@@ -18,7 +19,7 @@ const app = express();
 const port = process.env.PORT_SERVER || process.env.PORT; 
 
 if (!port) {
-    console.error('error file .env belum ada yang berisi pport server.');
+    console.error('error file .env belum ada yang berisi port server.');
     process.exit(1);
 }
 
@@ -321,7 +322,162 @@ app.use('/kalenderTugas', (req, res) => {
 });
 
 
+webpush.setVapidDetails(
+    process.env.VAPID_SUBJECT,
+    process.env.VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+);
 
+async function loadSubs() {
+    return await prisma.pushSubscription.findMany();
+}
+async function saveSub(sub) {
+    // sub: { endpoint, keys: { auth, p256dh } }
+    try {
+        await prisma.pushSubscription.upsert({
+            where: { endpoint: sub.endpoint },
+            update: {
+                keysAuth: sub.keys.auth,
+                keysP256dh: sub.keys.p256dh
+            },
+            create: {
+                endpoint: sub.endpoint,
+                keysAuth: sub.keys.auth,
+                keysP256dh: sub.keys.p256dh
+            }
+        });
+    } catch (e) {
+        console.error('gagal save subscribe', e);
+    }
+}
+async function deleteSub(endpoint) {
+    try {
+        await prisma.pushSubscription.delete({ where: { endpoint } });
+    } catch (e) {}
+}
+
+// Endpoint untuk menerima subscription dari client
+app.post('/subscribe', express.json(), async (req, res) => {
+    const sub = req.body;
+    if (!sub || !sub.endpoint || !sub.keys) return res.status(400).json({ error: 'Invalid subscription' });
+    await saveSub(sub);
+    res.status(201).json({ success: true });
+});
+
+
+app.get('/vapidPublicKey', (req, res) => {
+    res.json({ key: process.env.VAPID_PUBLIC_KEY });
+});
+const sendPushReminders = async (type) => {
+    const now = new Date();
+    let targetDate = new Date();
+        if (type === 'H-3') {
+        targetDate.setDate(now.getDate() + 3); // H-3 berarti 3 hari dari sekarang
+    } else if (type === 'H-1') {
+        targetDate.setDate(now.getDate() + 1); // H-1 berarti besok
+    } else {
+        targetDate.setDate(now.getDate()); // Hari H berarti hari ini
+    }
+
+    const ymd = targetDate.toISOString().split('T')[0];
+    console.log(`Checking ${type} tasks for date: ${ymd}`);
+
+    const tugas = await prisma.tugasMhs.findMany({
+        where: {
+            deadline: {
+                equals: new Date(ymd)
+            }
+        }
+    });
+
+    console.log(`Found ${tugas.length} tasks for ${type} with deadline ${ymd}`);
+    if (tugas.length > 0) {
+        console.log('Tasks found:', tugas.map(t => `${t.Namatugas} (${t.deadline})`));
+    }
+
+    if (!tugas.length) return;
+
+    let msg = `Ada ${tugas.length} tugas deadline ${type}:\n` +
+        tugas.map(t => `• ${t.Namatugas} (${t.matakuliah}) - ${ymd}`).join('\n');
+
+    let subs = await loadSubs();
+    for (let sub of subs) {
+        try {
+            await webpush.sendNotification({
+                endpoint: sub.endpoint,
+                keys: {
+                    auth: sub.keysAuth,
+                    p256dh: sub.keysP256dh
+                }
+            }, JSON.stringify({
+                title: `Reminder Tugas ${type}`,
+                body: msg,
+                icon: '/img/splash1.png'
+            }));
+        } catch (e) {
+            if (e.statusCode === 410 || e.statusCode === 404) {
+                await deleteSub(sub.endpoint);
+            }
+        }
+    }
+};
+
+const cronTimezone = process.env.TZ || null;
+
+// INI YANG H-1 SAMA H-3
+cron.schedule('0 19 * * *', () => {
+    const now = new Date();
+    console.log('Cron 19:00 triggered at', now.toISOString());
+    sendPushReminders('H-3');
+    sendPushReminders('H-1');
+}, cronTimezone ? { timezone: cronTimezone } : {});
+
+// INI YANG HARI H tugas
+cron.schedule('0 7 * * *', () => {
+    const now = new Date();
+    console.log('Cron 05:00 triggered at', now.toISOString());
+    sendPushReminders('H');
+}, cronTimezone ? { timezone: cronTimezone } : {});
+
+
+// ngetest push notification
+app.post('/test-push', async (req, res) => {
+    try {
+        let subs = await loadSubs();
+        if (!subs.length) return res.status(400).json({ error: 'gak ada yang subs notify' });
+        for (let sub of subs) {
+            await webpush.sendNotification({
+                endpoint: sub.endpoint,
+                keys: {
+                    auth: sub.keysAuth,
+                    p256dh: sub.keysP256dh
+                }
+            }, JSON.stringify({
+                title: 'Test Push',
+                body: 'Ini test push notofikasi aja.',
+                icon: '/img/splash1.png'
+            }));
+        }
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Endpoint untuk unsubscribe
+app.post('/unsubscribe', express.json(), async (req, res) => {
+    const endpoint = req.body.endpoint;
+    if (!endpoint) return res.status(400).json({ error: 'Invalid endpoint' });
+    
+    try {
+        await prisma.pushSubscription.delete({
+            where: { endpoint: endpoint }
+        });
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
 
 app.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname, 'views', 'notfound.html'));

@@ -78,6 +78,9 @@ Output JSON:
 npx prisma generate
 npx prisma migrate dev --name init
 
+
+npx web-push generate-vapid-keys
+
 ## Kontribusi
 
 Silakan kirimkan isu atau pull request untuk perbaikan atau fitur tambahan ya :D happy code!..

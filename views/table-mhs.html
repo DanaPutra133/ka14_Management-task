@@ -55,7 +55,7 @@
         }
 
         .dark-mode-toggle { position: fixed; top: 1rem; right: 1rem; display:flex; gap:.5rem; z-index:1000; }
-        .toggle-switch { position: relative; width: 56px; height: 28px; }
+        .toggle-switch { position: relative; width: 64px; height: 28px; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
         .toggle-switch .slider {
             position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
@@ -168,6 +168,15 @@ body.dark-theme .border-gray-200 {
     </div>
     <div class="w-full max-w-full mx-auto p-4 sm:p-6 lg:p-8 bg-white rounded-lg shadow-md">
         <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold mb-4 text-center">Manajemen Tugas Mahasiswa</h1>
+        <div class="mb-4 text-center">
+            <button id="enableReminderBtn" class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded shadow-md transition">
+                Enable Reminder Notifikasi
+            </button>
+            <button id="disableReminderBtn" class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded shadow-md transition ml-2" style="display:none">
+                Disable Reminder
+            </button>
+            <span id="reminderStatus" class="ml-2 text-sm text-gray-600"></span>
+        </div>
         <h2><strong>Penanggung Jawab </strong></h2>
             <br/>
             <ul>
@@ -338,6 +347,177 @@ body.dark-theme .border-gray-200 {
                 localStorage.setItem('darkMode', darkModeSwitch.checked);
             });
         })();
+
+
+        const enableReminderBtn = document.getElementById('enableReminderBtn');
+        const disableReminderBtn = document.getElementById('disableReminderBtn');
+        const reminderStatus = document.getElementById('reminderStatus');
+
+        function isReminderEnabled() {
+            return localStorage.getItem('reminder-enabled') === 'true';
+        }
+
+        function setReminderEnabled(val) {
+            localStorage.setItem('reminder-enabled', val ? 'true' : 'false');
+        }
+
+        function showStatus() {
+            if (isReminderEnabled()) {
+                reminderStatus.textContent = 'Reminder aktif';
+                enableReminderBtn.style.display = 'none';
+                disableReminderBtn.style.display = 'inline-block';
+            } else {
+                reminderStatus.textContent = '';
+                enableReminderBtn.style.display = 'inline-block';
+                disableReminderBtn.style.display = 'none';
+            }
+        }
+
+        enableReminderBtn.addEventListener('click', async () => {
+            if (!('Notification' in window)) {
+                alert('Browser tidak mendukung notifikasi.');
+                return;
+            }
+            const perm = await Notification.requestPermission();
+            if (perm === 'granted') {
+                setReminderEnabled(true);
+                showStatus();
+                await subscribePush();
+                Swal.fire('Reminder aktif!', 'Kamu akan mendapat notifikasi tugas otomatis.', 'success');
+            } else {
+                Swal.fire('Gagal', 'Izin notifikasi tidak diberikan.', 'error');
+            }
+        });
+
+        async function unsubscribePush() {
+            if (!('serviceWorker' in navigator)) return;
+            
+            try {
+                const registration = await navigator.serviceWorker.ready;
+                const subscription = await registration.pushManager.getSubscription();
+                
+                if (subscription) {
+                    await subscription.unsubscribe();
+                    
+                    // Hapus dari database
+                    await fetch('/unsubscribe', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ endpoint: subscription.endpoint })
+                    });
+                }
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for(let reg of registrations) {
+                    await reg.unregister();
+                }
+                localStorage.removeItem('reminder-enabled');
+                
+                // Reset notification permission (harus manual di browser settings)
+                Swal.fire('Reminder dinonaktifkan', 'Untuk menghapus izin notifikasi sepenuhnya, silakan reset permission di pengaturan browser.', 'info');
+                
+                showStatus();
+            } catch (e) {
+                console.error('Error unsubscribing:', e);
+                Swal.fire('Error', 'Gagal menonaktifkan reminder', 'error');
+            }
+        }
+
+        disableReminderBtn.addEventListener('click', unsubscribePush);
+
+        async function subscribePush() {
+            if (!('serviceWorker' in navigator)) return;
+            const reg = await navigator.serviceWorker.register('/sw.js');
+            const { key } = await fetch('/vapidPublicKey').then(r => r.json());
+            const sub = await reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(key)
+            });
+            await fetch('/subscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(sub)
+            });
+        }
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+            const rawData = atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+            return outputArray;
+        }
+
+        function registerServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js');
+            }
+        }
+
+        showStatus();
+        if (isReminderEnabled()) registerServiceWorker();
+
+        // --- Reminder Scheduler ---
+        function getTodayYMD() {
+            const d = new Date();
+            return d.toISOString().split('T')[0];
+        }
+        function getYMD(date) {
+            return (new Date(date)).toISOString().split('T')[0];
+        }
+        function getDiffInDays(dateStr) {
+            const today = new Date(getTodayYMD());
+            const d = new Date(dateStr);
+            return Math.floor((d - today) / (1000 * 60 * 60 * 24));
+        }
+        if (isReminderEnabled()) {
+            setInterval(checkAndNotify, 5 * 60 * 1000);
+            checkAndNotify();
+        }
+
+        function checkAndNotify() {
+            const now = new Date();
+            const hour = now.getHours();
+            const minute = now.getMinutes();
+
+            if (hour === 19 && minute < 10) {
+                sendDeadlineReminder(-3, 'H-3');
+                sendDeadlineReminder(-1, 'H-1');
+            }
+            if (hour === 5 && minute < 10) {
+                sendDeadlineReminder(0, 'Hari H');
+            }
+        }
+
+        async function sendDeadlineReminder(diff, label) {
+            const todayYMD = getTodayYMD();
+            const key = `reminder-${label}-${todayYMD}`;
+            if (localStorage.getItem(key)) return; 
+
+            try {
+                const response = await fetch('/tugas/mahasiswa');
+                const data = await response.json();
+                const tugas = Array.isArray(data) ? data : [];
+                const filtered = tugas.filter(t => getDiffInDays(t.deadline) === diff);
+                if (filtered.length > 0) {
+                    let msg = `Ada ${filtered.length} tugas deadline ${label}:\n`;
+                    msg += filtered.map(t => `• ${t.Namatugas} (${t.matakuliah}) - ${t.deadline}`).join('\n');
+                    showNotification('Reminder Tugas ' + label, msg);
+                    localStorage.setItem(key, 'sent');
+                }
+            } catch (e) {
+                console.error('Gagal mengirim reminder:', e);
+            }
+        }
+
+        function showNotification(title, body) {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.ready.then(reg => {
+                    reg.showNotification(title, { body, icon: '/img/splash1.png' });
+                });
+            } else if ('Notification' in window) {
+                new Notification(title, { body, icon: '/img/splash1.png' });
+            }
+        }
 
         loadTugas();
     </script>
