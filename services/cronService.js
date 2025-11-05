@@ -8,7 +8,7 @@ async function checkDeadlines() {
         const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
         const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
 
-        console.log('Checking mahasiswa tasks (Prisma)...');
+        console.log('mengecek tugas mahasiswa (Prisma)...');
         const deletedMhs = await prisma.tugasMhs.deleteMany({
             where: {
                 deadline: {
@@ -18,12 +18,12 @@ async function checkDeadlines() {
             }
         });
         if (deletedMhs.count > 0) {
-            console.log(`deleted ${deletedMhs.count} mahasiswa task(s) with today deadline`);
+            console.log(`deleted ${deletedMhs.count} tygas mahasiswa dengan deadline hari ini`);
         } else {
-            console.log('no mahasiswa deadlines for today');
+            console.log('gak ada tugas mahasiswa untuk hari ini');
         }
 
-        console.log('Checking dosen tasks (Prisma)...');
+        console.log('mengecek tugas dosen (Prisma)...');
         const deletedDosen = await prisma.tugasDosen.deleteMany({
             where: {
                 TanggalMasuk: {
@@ -33,24 +33,21 @@ async function checkDeadlines() {
             }
         });
         if (deletedDosen.count > 0) {
-            console.log(`deleted ${deletedDosen.count} dosen task(s) with today TanggalMasuk`);
+            console.log(`mengahpus ${deletedDosen.count} tugas dosen dengan TanggalMasuk hari ini`);
         } else {
-            console.log('no dosen deadlines for today');
+            console.log('gak ada tugas dosen untuk hari ini');
         }
     } catch (error) {
-        console.error('error checking deadlines (Prisma):', error);
+        console.error('error di (Prisma):', error);
     }
 }
 
-// jalan jam 23:00 buat delete nya di hari H
 const scheduledTask = cron.schedule('0 23 * * *', () => {
     console.log('menjalakan hapus otomatis (Prisma)...');
     checkDeadlines();
 });
 
-// Corn memulai task nya
 scheduledTask.start();
-checkDeadlines();
 
 process.on('SIGINT', async () => {
     try {
