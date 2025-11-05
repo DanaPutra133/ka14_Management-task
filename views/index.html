@@ -639,8 +639,13 @@
         updateClock();
 
         function tryApi(endpoint) {
-            window.open(endpoint, '_blank');
+            // window.open(endpoint, '_blank'); // jaga jaga biar semua button jadi blank pas di klik
+            window.open(endpoint);
         }
+
+        // function button1(endpoint) {
+        //     window.open(endpoint)
+        // }
 
 
         // fetchGempaData(); // Uncomment jika Anda memiliki bagian gempa di HTML

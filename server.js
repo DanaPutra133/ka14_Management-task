@@ -31,11 +31,6 @@ app.use(session({
     cookie: { secure: false } // Set to true if using HTTPS
 }));
 
-//halper statistik
-const LOG_FILE = './logs.json';
-const readLogs = () => { try { return JSON.parse(fs.readFileSync(LOG_FILE, 'utf-8')); } catch (e) { return []; } };
-const writeLogs = (data) => fs.writeFileSync(LOG_FILE, JSON.stringify(data, null, 2));
-
 
 //statistik rpg
 

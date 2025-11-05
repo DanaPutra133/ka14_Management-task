@@ -152,14 +152,14 @@
         }
 
         .dark-mode-toggle { position: fixed; top: 1rem; right: 1rem; display:flex; gap:.5rem; z-index:1000; }
-        .toggle-switch { position: relative; width: 56px; height: 28px; }
+        .toggle-switch { position: relative; width: 64px; height: 28px; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
         .toggle-switch .slider {
             position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
             background-color: #6b7280; transition: .3s; border-radius: 999px;
         }
         .toggle-switch .slider:before {
-            content:""; position:absolute; height:22px; width:22px; left:3px; bottom:3px;
+            content:""; position:absolute; height:22px; width:22px; left:2px; bottom:3px;
             background-color: #fff; transition:.3s; border-radius:50%;
         }
         .toggle-switch input:checked + .slider { background-color: var(--btn-primary); }
