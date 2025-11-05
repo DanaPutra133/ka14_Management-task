@@ -5,3 +5,10 @@ package-lock.json
 apikeys.json
 DB_allert/reminders_db.json
 logs.json
+
+/prisma/migrations/
+/prisma/dev.db
+
+.env
+.idea
+.vscode

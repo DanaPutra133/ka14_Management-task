@@ -6,11 +6,6 @@ const path = require('path');
 const dbPath = path.join(__dirname, '../database/tugas-mhs.json');
 const dbPathDosen = path.join(__dirname, '../database/status-dosen.json');
 
-/*
-Mahasiswa Routes
-*/
-
-// Get all tugas
 router.get('/mahasiswa', async (req, res) => {
     try {
         const data = await fs.readFile(dbPath, 'utf8');
@@ -20,14 +15,12 @@ router.get('/mahasiswa', async (req, res) => {
     }
 });
 
-// Add new tugas
 router.post('/mahasiswa', async (req, res) => {
     try {
         const data = await fs.readFile(dbPath, 'utf8');
         const json = JSON.parse(data);
         json.tugas.push(req.body);
 
-        // Sort tugas by nearest deadline
         json.tugas.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
 
         await fs.writeFile(dbPath, JSON.stringify(json, null, 2));
@@ -37,7 +30,6 @@ router.post('/mahasiswa', async (req, res) => {
     }
 });
 
-// Delete tugas
 router.delete('/mahasiswa/:index', async (req, res) => {
     try {
         const data = await fs.readFile(dbPath, 'utf8');
@@ -50,16 +42,12 @@ router.delete('/mahasiswa/:index', async (req, res) => {
     }
 });
 
-// Update tugas
 router.put('/mahasiswa/:index', async (req, res) => {
     try {
         const data = await fs.readFile(dbPath, 'utf8');
         const json = JSON.parse(data);
         json.tugas[req.params.index] = req.body;
-
-        // Sort tugas by nearest deadline
         json.tugas.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
-
         await fs.writeFile(dbPath, JSON.stringify(json, null, 2));
         res.json({ message: 'Tugas Berhasil DI Update!' });
     } catch (error) {
@@ -67,10 +55,7 @@ router.put('/mahasiswa/:index', async (req, res) => {
     }
 });
 
-/*
-Dosen Routes khusus
-*/
-// Get all tugas
+
 router.get('/dosen', async (req, res) => {
     try {
         const data = await fs.readFile(dbPathDosen, 'utf8');
@@ -80,16 +65,12 @@ router.get('/dosen', async (req, res) => {
     }
 });
 
-// Add new tugas
 router.post('/dosen', async (req, res) => {
     try {
         const data = await fs.readFile(dbPathDosen, 'utf8');
         const json = JSON.parse(data);
         json.tugas.push(req.body);
-
-        // Sort tugas by nearest TanggalMasuk
         json.tugas.sort((a, b) => new Date(a.TanggalMasuk) - new Date(b.TanggalMasuk));
-
         await fs.writeFile(dbPathDosen, JSON.stringify(json, null, 2));
         res.json({ message: 'Status Berhasil Di Simpan' });
     } catch (error) {
@@ -97,7 +78,6 @@ router.post('/dosen', async (req, res) => {
     }
 });
 
-// Delete tugas
 router.delete('/dosen/:index', async (req, res) => {
     try {
         const data = await fs.readFile(dbPathDosen, 'utf8');
@@ -111,16 +91,12 @@ router.delete('/dosen/:index', async (req, res) => {
 }
 );
 
-// Update tugas
 router.put('/dosen/:index', async (req, res) => {
     try {
         const data = await fs.readFile(dbPathDosen, 'utf8');
         const json = JSON.parse(data);
         json.tugas[req.params.index] = req.body;
-
-        // Sort tugas by nearest TanggalMasuk
         json.tugas.sort((a, b) => new Date(a.TanggalMasuk) - new Date(b.TanggalMasuk));
-
         await fs.writeFile(dbPathDosen, JSON.stringify(json, null, 2));
         res.json({ message: 'Status Berhasil Di Update' });
     } catch (error) {
@@ -128,8 +104,6 @@ router.put('/dosen/:index', async (req, res) => {
     }
 }
 );
-
-// 404 handler for tugas routes
 router.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname, '../views', 'notfound.html'));
 });

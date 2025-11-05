@@ -311,7 +311,7 @@ body.dark-theme .border-gray-200 {
             try {
                 const response = await fetch('/tugas/mahasiswa');
                 const data = await response.json();
-                displayTugas(data.tugas || []); 
+                displayTugas(Array.isArray(data) ? data : []); 
             } catch (error) {
                 Swal.fire({
                     icon: 'error',
@@ -325,8 +325,6 @@ body.dark-theme .border-gray-200 {
             if (!Array.isArray(tugas)) {
                 tugas = [];
             }
-
-            // Sort tugas by deadline 
             tugas.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
 
             tugasList.innerHTML = tugas.length === 0 ? 
@@ -446,7 +444,8 @@ body.dark-theme .border-gray-200 {
             try {
                 const response = await fetch('/tugas/mahasiswa');
                 const data = await response.json();
-                const tugas = data.tugas[index];
+                const tugas = Array.isArray(data) ? data[index] : null;
+                if (!tugas) throw new Error('Tugas tidak ditemukan');
 
                 document.getElementById('matakuliah').value = tugas.matakuliah;
                 document.getElementById('deadline').value = tugas.deadline;
