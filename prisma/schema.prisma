@@ -1,0 +1,37 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model TugasMhs {
+  id         Int      @id @default(autoincrement())
+  matakuliah String
+  Namatugas  String
+  UrlGambar  String?
+  deadline   DateTime
+  kelompok   Boolean  @default(false)
+  vclass     Boolean  @default(false)
+  praktikum  Boolean  @default(false)
+  ilab       Boolean  @default(false)
+  Mandiri    Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model TugasDosen {
+  id         Int      @id @default(autoincrement())
+  matakuliah String
+  TanggalMasuk DateTime
+  Kelas      String
+  Jam        String
+  LinkGmeet  String?
+  vclass     Boolean  @default(false)
+  Gmeet      Boolean  @default(false)
+  offline    Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}

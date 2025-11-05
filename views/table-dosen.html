@@ -23,8 +23,6 @@
             <br/>
             <ul>
                 <li><strong>Daffa</strong> - Ketua Kelas</li>
-                <li><strong>Abu Bakar</strong> - Statistika</li>
-                <li><strong>Bimo</strong> - Pemrograman Berotientasi Objek</li>
             </ul>
             <br/>
         </div>
@@ -75,19 +73,17 @@
             try {
                 const response = await fetch('/tugas/dosen');
                 const data = await response.json();
-                displayTugas(data.tugas || []); // Add fallback empty array
+                displayTugas(Array.isArray(data) ? data : []); 
             } catch (error) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
                     text: 'Gagal memuat data tugas!'
                 });
-                // Initialize empty table if error
                 displayTugas([]);
             }
         }
 
-        // Display tugas in the table
         function displayTugas(tugas) {
             if (!Array.isArray(tugas)) {
                 tugas = [];
@@ -114,5 +110,3 @@
     </script>
 </body>
 </html>
-
-<!-- end -->

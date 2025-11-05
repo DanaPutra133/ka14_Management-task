@@ -249,27 +249,23 @@ body.dark-theme .border-gray-200 {
         const filterPraktikum = document.getElementById('filterPraktikum');
         const filterIlab = document.getElementById('filterIlab');
         const filterMandiri = document.getElementById('filterMandiri');
-        let allTugas = []; // Store all tasks for filtering
-
-        // Load tugas data
+        let allTugas = []; 
         async function loadTugas() {
             try {
                 const response = await fetch('/tugas/mahasiswa');
                 const data = await response.json();
-                allTugas = data.tugas || []; // Store all tasks
-                applyFilters(); // Apply filters after loading
+                allTugas = Array.isArray(data) ? data : []; 
+                applyFilters();
             } catch (error) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
                     text: 'Gagal memuat data tugas!'
                 });
-                allTugas = []; // Initialize empty array
+                allTugas = []; 
                 applyFilters();
             }
         }
-
-        // Apply filters to the table
         function applyFilters() {
             const filteredTugas = allTugas.filter(t => {
                 const kelompokFilter = !filterKelompok.checked || t.kelompok;
@@ -281,8 +277,6 @@ body.dark-theme .border-gray-200 {
             });
             displayTugas(filteredTugas);
         }
-
-        // Display tugas in the table
         function displayTugas(tugas) {
             const getSelectedFilter = () => {
                 if (filterKelompok.checked) return "Kelompok";
@@ -315,7 +309,7 @@ body.dark-theme .border-gray-200 {
                 `).join('');
         }
 
-        // user cuma bisa 1 isi aja
+        // user cuma bisa cek 1 aja
         [filterKelompok, filterVclass, filterPraktikum, filterIlab, filterMandiri].forEach(filter => {
             filter.addEventListener('change', (event) => {
                 if (event.target.checked) {

@@ -213,7 +213,7 @@
             try {
                 const response = await fetch('/tugas/dosen');
                 const data = await response.json();
-                displayTugas(data.tugas || []); 
+                displayTugas(Array.isArray(data) ? data : []); 
             } catch (error) {
                 Swal.fire({
                     icon: 'error',
@@ -253,8 +253,6 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            // Validate checkboxes
             if (!validateCheckboxes()) {
                 return;
             }
@@ -350,7 +348,9 @@
             try {
                 const response = await fetch('/tugas/dosen');
                 const data = await response.json();
-                const tugas = data.tugas[index];
+                const tugas = Array.isArray(data) ? data[index] : null;
+                if (!tugas) throw new Error('Tugas tidak ditemukan');
+
                 document.getElementById('matakuliah').value = tugas.matakuliah;
                 document.getElementById('TanggalMasuk').value = tugas.TanggalMasuk;
                 document.getElementById('Kelas').value = tugas.Kelas;
@@ -376,6 +376,7 @@
                 });
             }
         }
+
         loadTugas();
     </script>
 </body>
