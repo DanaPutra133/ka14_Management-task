@@ -34,7 +34,7 @@ web management tugas milik 3KA14.
 
 ## Cara Penggunaan
 
-1. Jalankan scraper dengan NPM:
+1. Jalankan web dengan NPM:
 
    ```javascript
    npm start
@@ -57,7 +57,11 @@ npx web-push generate-vapid-keys
 
 ## Testing push 
 ```bash
-curl -X POST http://localhost:3000/test-push
+{
+  "title": "Notifikasi Test",
+  "body": "Ini  notifikasi",
+  "icon": "https://example.com/icon.png"
+}
 ```
 
 ```bash

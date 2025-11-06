@@ -19,6 +19,7 @@ const tugasRoutes = require('./router/tugas');
 const app = express();
 const port = process.env.PORT_SERVER || process.env.PORT; 
 
+// Jangan di hapus, ini buat contoh webhook discord
 // async function sendDiscordWebhook(message) {
 //     if (!DISCORD_WEBHOOK_URL) {
 //         throw new Error('DISCORD_WEBHOOK_URL belum diatur di .env');
@@ -249,7 +250,6 @@ app.use('/tugas', (req, res, next) => {
                 return originalJson(body.tugas);
             }
         } catch (e) {
-            // fall back to original
         }
         return originalJson(body);
     };
@@ -463,27 +463,66 @@ cron.schedule('0 7 * * *', () => {
 
 
 // ngetest push notification
-app.post('/test-push', async (req, res) => {
-    try {
-        let subs = await loadSubs();
-        if (!subs.length) return res.status(400).json({ error: 'gak ada yang subs notify' });
-        for (let sub of subs) {
-            await webpush.sendNotification({
-                endpoint: sub.endpoint,
-                keys: {
-                    auth: sub.keysAuth,
-                    p256dh: sub.keysP256dh
-                }
-            }, JSON.stringify({
-                title: 'Test Push',
-                body: 'Ini test push notifikasi aja.',
-                icon: '/img/splash1.png'
-            }));
-        }
-        res.json({ success: true });
-    } catch (e) {
-    res.status(500).json({ error: e.message, details: e });    }
+// app.post('/test-push2', async (req, res) => {
+//     try {
+//         let subs = await loadSubs();
+//         if (!subs.length) return res.status(400).json({ error: 'gak ada yang subs notify' });
+//         for (let sub of subs) {
+//             await webpush.sendNotification({
+//                 endpoint: sub.endpoint,
+//                 keys: {
+//                     auth: sub.keysAuth,
+//                     p256dh: sub.keysP256dh
+//                 }
+//             }, JSON.stringify({
+//                 title: 'Test Push',
+//                 body: 'Ini test push notifikasi aja.',
+//                 icon: '/img/splash1.png'
+//             }));
+//         }
+//         res.json({ success: true });
+//     } catch (e) {
+//     res.status(500).json({ error: e.message, details: e });    }
+// });
+
+// tesh push custom pesan + ada key header
+app.post("/test-push", async (req, res) => {
+  const clientKey = req.headers["x-api-key"];
+
+  if (clientKey !== process.env.TEST_PUSH_KEY) {
+    return res
+      .status(403)
+      .json({ error: "API key salah atau tidak ada." });
+  }
+
+  const { title, body, icon } = req.body;
+  if (!title || !body || !icon) {
+    return res.status(400).json({ error: "title, body, icon wajib diisi." });
+  }
+
+  try {
+    const subs = await loadSubs();
+    if (!subs.length)
+      return res.status(400).json({ error: "Tidak ada subs yang terdaftar." });
+
+    let sentCount = 0;
+    for (let sub of subs) {
+      await webpush.sendNotification(
+        {
+          endpoint: sub.endpoint,
+          keys: { auth: sub.keysAuth, p256dh: sub.keysP256dh },
+        },
+        JSON.stringify({ title, body, icon })
+      );
+      sentCount++;
+    }
+
+    res.json({ success: true, sentTo: sentCount });
+  } catch (e) {
+    res.status(500).json({ error: e.message || e });
+  }
 });
+
 
 // Endpoint untuk unsubscribe
 app.post('/unsubscribe', express.json(), async (req, res) => {
@@ -604,48 +643,50 @@ cron.schedule(
   process.env.TZ ? { timezone: process.env.TZ } : {}
 );
 
-app.post("/test-discord-format", express.json(), async (req, res) => {
-  try {
-    const data = Array.isArray(req.body.data) ? req.body.data : [];
-    const groups = { H3: [], H1: [], H: [] };
+// ========== DI MATIKAN SEMENTARA UNTUK PENGUJIAN AJA ==========
 
-    for (const t of data) {
-      const diff = Math.ceil(
-        (new Date(t.deadline) - new Date()) / (1000 * 60 * 60 * 24)
-      );
-      if (diff === 3) groups.H3.push(t);
-      else if (diff === 1) groups.H1.push(t);
-      else if (diff === 0) groups.H.push(t);
-    }
+// app.post("/test-discord-format", express.json(), async (req, res) => {
+//   try {
+//     const data = Array.isArray(req.body.data) ? req.body.data : [];
+//     const groups = { H3: [], H1: [], H: [] };
 
-    if (groups.H3.length) await sendDiscordWebhook(makeEmbed("H3", groups.H3));
-    if (groups.H1.length) await sendDiscordWebhook(makeEmbed("H1", groups.H1));
-    if (groups.H.length) await sendDiscordWebhook(makeEmbed("H", groups.H));
+//     for (const t of data) {
+//       const diff = Math.ceil(
+//         (new Date(t.deadline) - new Date()) / (1000 * 60 * 60 * 24)
+//       );
+//       if (diff === 3) groups.H3.push(t);
+//       else if (diff === 1) groups.H1.push(t);
+//       else if (diff === 0) groups.H.push(t);
+//     }
 
-    res.json({
-      ok: true,
-      sent: { H3: groups.H3.length, H1: groups.H1.length, H: groups.H.length },
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
-  }
-});
+//     if (groups.H3.length) await sendDiscordWebhook(makeEmbed("H3", groups.H3));
+//     if (groups.H1.length) await sendDiscordWebhook(makeEmbed("H1", groups.H1));
+//     if (groups.H.length) await sendDiscordWebhook(makeEmbed("H", groups.H));
 
-app.post("/test-discord", async (req, res) => {
-  try {
-    const { message } = req.body;
-    if (!message)
-      return res
-        .status(400)
-        .json({ error: "pesan nya mana? masukin di body massage" });
+//     res.json({
+//       ok: true,
+//       sent: { H3: groups.H3.length, H1: groups.H1.length, H: groups.H.length },
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: err.message });
+//   }
+// });
 
-    await sendDiscordWebhook(message);
-    res.json({ success: true, sent: message });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+// app.post("/test-discord", async (req, res) => {
+//   try {
+//     const { message } = req.body;
+//     if (!message)
+//       return res
+//         .status(400)
+//         .json({ error: "pesan nya mana? masukin di body massage" });
+
+//     await sendDiscordWebhook(message);
+//     res.json({ success: true, sent: message });
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// });
 
 
 app.use((req, res) => {
