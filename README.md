@@ -57,7 +57,11 @@ npx web-push generate-vapid-keys
 
 ## Testing push 
 ```bash
-curl -X POST http://localhost:3000/test-push
+{
+  "title": "Notifikasi Test",
+  "body": "Ini  notifikasi",
+  "icon": "https://example.com/icon.png"
+}
 ```
 
 ```bash
