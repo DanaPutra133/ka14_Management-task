@@ -9,6 +9,7 @@ const cronService = require('./services/cronService');
 const session = require('express-session');
 const fs = require('fs');
 const webpush = require('web-push');
+const axios = require('axios');
 
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
@@ -17,6 +18,22 @@ const tugasRoutes = require('./router/tugas');
 
 const app = express();
 const port = process.env.PORT_SERVER || process.env.PORT; 
+
+// async function sendDiscordWebhook(message) {
+//     if (!DISCORD_WEBHOOK_URL) {
+//         throw new Error('DISCORD_WEBHOOK_URL belum diatur di .env');
+//     }
+
+//     try {
+//         await axios.post(DISCORD_WEBHOOK_URL, {
+//             content: message
+//         });
+//         console.log('Pesan webhook Discord terkirim:', message);
+//     } catch (error) {
+//         console.error('Gagal kirim webhook:', error.response?.data || error.message);
+//         throw error;
+//     }
+// }
 
 if (!port) {
     console.error('error file .env belum ada yang berisi port server.');
@@ -322,6 +339,8 @@ app.use('/kalenderTugas', (req, res) => {
 });
 
 
+// ==================== PUSH NOTIFICATION WEB SERVICE ====================
+
 webpush.setVapidDetails(
     process.env.VAPID_SUBJECT,
     process.env.VAPID_PUBLIC_KEY,
@@ -424,6 +443,9 @@ const sendPushReminders = async (type) => {
 
 const cronTimezone = process.env.TZ || null;
 
+
+
+// ==================== SETUP CRON JOBS PUSH WEB NOTIFY ====================
 // INI YANG H-1 SAMA H-3
 cron.schedule('0 19 * * *', () => {
     const now = new Date();
@@ -454,14 +476,13 @@ app.post('/test-push', async (req, res) => {
                 }
             }, JSON.stringify({
                 title: 'Test Push',
-                body: 'Ini test push notofikasi aja.',
+                body: 'Ini test push notifikasi aja.',
                 icon: '/img/splash1.png'
             }));
         }
         res.json({ success: true });
     } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
+    res.status(500).json({ error: e.message, details: e });    }
 });
 
 // Endpoint untuk unsubscribe
@@ -475,9 +496,157 @@ app.post('/unsubscribe', express.json(), async (req, res) => {
         });
         res.json({ success: true });
     } catch (e) {
-        res.status(500).json({ error: e.message });
+         res.status(500).json({ error: e.message, details: e });
     }
 });
+
+// ==================== DISCORD WEBHOOK REMINDER ====================
+
+const sendDiscordWebhook = async (payload) => {
+  if (!process.env.DISCORD_WEBHOOK_URL)
+    return console.error("DISCORD_WEBHOOK_URL belum di set");
+  try {
+    await axios.post(process.env.DISCORD_WEBHOOK_URL, payload);
+    console.log("webhook Discord berhasil di kirim");
+  } catch (err) {
+    console.error("Discord webhook error:", err.response?.data || err.message);
+  }
+};
+
+const getKategori = (task) => {
+  const categories = [];
+  if (task.kelompok) categories.push("Kelompok");
+  if (task.vclass) categories.push("VClass");
+  if (task.praktikum) categories.push("Praktikum");
+  if (task.ilab) categories.push("iLab");
+  if (task.Mandiri) categories.push("Mandiri");
+  return categories.length > 0 ? categories.join(", ") : "-";
+};
+
+// this embed maker -> di ubah di sini kalau mau ganti style ngirim nya
+const makeEmbed = (type, tasks) => {
+  const map = {
+    H3: { color: 0xffd93d, title: "🔔 REMINDER H-3 DEADLINE TUGAS! 🔔" },
+    H1: { color: 0xff4d4d, title: "🚨 FINAL REMINDER H-1 DEADLINE TUGAS! 🚨" },
+    H: { color: 0x4caf50, title: "✅ HARI-H DEADLINE TUGAS! ✅" },
+  };
+  const s = map[type];
+  if (!s || !tasks || !tasks.length) return null;
+
+  const fields = tasks.map((t) => ({
+    name: `${t.matakuliah || "Umum"}`,
+    value: `• ${t.Namatugas || "-"}\n• Deadline: ${new Date(
+      t.deadline
+    ).toLocaleDateString("id-ID")}\n• Kategori: ${getKategori(t)}\n${
+      t.UrlGambar ? `• URL: ${t.UrlGambar}\n` : ""
+    }`,
+    inline: false,
+  }));
+
+  return {
+    embeds: [
+      {
+        title: s.title,
+        color: s.color,
+        fields,
+        footer: {
+          text: `JANGAN SAMPAI LUPA • ${new Date().toLocaleString("id-ID")}`,
+        },
+      },
+    ],
+  };
+};
+
+// Kirim reminder berdasarkan jenis H-3, H-1, H
+const sendRemindersForType = async (type) => {
+  try {
+    let target = new Date();
+    if (type === "H-3") target.setDate(new Date().getDate() + 3);
+    else if (type === "H-1") target.setDate(new Date().getDate() + 1);
+    else target = new Date();
+
+    const ymd = target.toISOString().split("T")[0];
+    const tugas = await prisma.tugasMhs.findMany({
+      where: { deadline: { equals: new Date(ymd) } },
+    });
+
+    if (!tugas || !tugas.length)
+      return console.log(`no tasks for ${type} ${ymd}`);
+    console.log(`found ${tugas.length} tasks for ${type} ${ymd}`);
+
+    const embed = makeEmbed(
+      type === "H-3" ? "H3" : type === "H-1" ? "H1" : "H",
+      tugas
+    );
+    if (embed) await sendDiscordWebhook(embed);
+  } catch (e) {
+    console.error("sendRemindersForType error", e);
+  }
+};
+
+ // ========== SETUP JAM UNTUK DISCORD WEBHOOK ==========
+cron.schedule(
+  "0 19 * * *",
+  () => {
+    console.log("cron 19:00 trigger - H-3 & H-1");
+    sendRemindersForType("H-3");
+    sendRemindersForType("H-1");
+  },
+  process.env.TZ ? { timezone: process.env.TZ } : {}
+);
+
+cron.schedule(
+  "0 7 * * *",
+  () => {
+    console.log("cron 07:00 trigger - Deadline H");
+    sendRemindersForType("H");
+  },
+  process.env.TZ ? { timezone: process.env.TZ } : {}
+);
+
+app.post("/test-discord-format", express.json(), async (req, res) => {
+  try {
+    const data = Array.isArray(req.body.data) ? req.body.data : [];
+    const groups = { H3: [], H1: [], H: [] };
+
+    for (const t of data) {
+      const diff = Math.ceil(
+        (new Date(t.deadline) - new Date()) / (1000 * 60 * 60 * 24)
+      );
+      if (diff === 3) groups.H3.push(t);
+      else if (diff === 1) groups.H1.push(t);
+      else if (diff === 0) groups.H.push(t);
+    }
+
+    if (groups.H3.length) await sendDiscordWebhook(makeEmbed("H3", groups.H3));
+    if (groups.H1.length) await sendDiscordWebhook(makeEmbed("H1", groups.H1));
+    if (groups.H.length) await sendDiscordWebhook(makeEmbed("H", groups.H));
+
+    res.json({
+      ok: true,
+      sent: { H3: groups.H3.length, H1: groups.H1.length, H: groups.H.length },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/test-discord", async (req, res) => {
+  try {
+    const { message } = req.body;
+    if (!message)
+      return res
+        .status(400)
+        .json({ error: "pesan nya mana? masukin di body massage" });
+
+    await sendDiscordWebhook(message);
+    res.json({ success: true, sent: message });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 app.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname, 'views', 'notfound.html'));

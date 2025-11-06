@@ -1,12 +1,12 @@
-# GUNADARMA API DOCUMENTATION
+# 3KA14 WEBSITE TUGAS MANAGEMENT
 
-Tools web scraping untuk mengambil data jadwal kursus mahasiswa dari platform LEBKOM Universitas Gunadarma dan BAAK. scraper ini menggunakan Node.js dengan Axios dan Cheerio untuk scrape HTML dan menarik data berdasarkan NPM atau nomor kelas tertentu.
+web management tugas milik 3KA14.
 
 ## Fitur
 
-- Mengambil data jadwal dalam format JSON.
-- Menyediakan informasi seperti `npm`, `nama`, `kelas`, `jadwal_kursus`, `kategori_kursus`, `lokasi`, dan lainnya.
-- Mudah dikonfigurasi untuk berbagai kelas atau mahasiswa.
+- Crud tugas.
+- Webhook discord
+- Reminder web Notify
 
 ## Package
 
@@ -14,12 +14,16 @@ Tools web scraping untuk mengambil data jadwal kursus mahasiswa dari platform LE
 - Axios
 - Cheerio
 
+## Database
+
+- Sqlite
+
 ## cara install
 
 1. Clone repositori:
 
    ```bash
-   git clone https://github.com/DanaPutra133/GUNADARMA.scraper.git
+   git clone https://github.com/DanaPutra133/ka14_Management-task
    ```
 
 2. Install module:
@@ -30,56 +34,41 @@ Tools web scraping untuk mengambil data jadwal kursus mahasiswa dari platform LE
 
 ## Cara Penggunaan
 
-1. Jalankan scraper dengan NPM atau kode kelas tertentu:
+1. Jalankan scraper dengan NPM:
 
    ```javascript
-   node nama file nya.js
+   npm start
    ```
 
-2. Sesuaikan skrip untuk mengambil data yang diinginkan.
+## DB prisma generate
 
-## Contoh Hasil dari LABKOM
-
-Output JSON:
-
-```json
-[
-  {
-    "no": "1",
-    "npm": "npm",
-    "nama": "nama",
-    "kelas": "kelas",
-    "jadwal_kursus": "DATABASE FOR BEGINNER / 1DBBR231514K",
-    "kategori_kursus": "REGULER / KULIAH",
-    "lokasi": "lokasi",
-    "hari": "hari",
-    "ruang": "ruangan",
-    "sesi": "sesi"
-  }
-]
-```
-
-## Contoh Hasil dari BAAK
-
-Output JSON:
-
-```json
-[
-  {
-    "no": "1",
-    "npm": "npm",
-    "nama": "nama",
-    "kelas_lama": "kelas lama dia",
-    "kelas_baru": "kelas baru dia"
-  }
-]
-```
-
+```bash
 npx prisma generate
+```
+```bash
 npx prisma migrate dev --name init
+```
 
-
+## Generate vapid key 
+```bash
 npx web-push generate-vapid-keys
+```
+
+
+## Testing push 
+```bash
+curl -X POST http://localhost:3000/test-push
+```
+
+```bash
+curl -X POST http://localhost:3000/test-discord \
+    -H "Content-Type: application/json" \
+    -d '{"message":"tes 123 ini tes webhook "}'
+```
+
+```bash
+curl -X POST http://localhost:3000/test-discord-format -H "Content-Type: application/json" -d '{"data":[{"matakuliah":"M4 Sistem Keamanan","Namatugas":"Algoritma Substitusi Dan Permutasi","deadline":"2025-11-07","UrlGambar":null},{"matakuliah":"Interaksi manusia dan komputer","Namatugas":"Bandingkan desain website","deadline":"2025-11-05","UrlGambar":null},{"matakuliah":"M4 Sistem","Namatugas":"Tugas H-3","deadline":"2025-11-09","UrlGambar":null}]}' 
+```
 
 ## Kontribusi
 
