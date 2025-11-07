@@ -34,7 +34,7 @@ web management tugas milik 3KA14.
 
 ## Cara Penggunaan
 
-1. Jalankan web dengan NPM:
+1. Jalankan scraper dengan NPM:
 
    ```javascript
    npm start
