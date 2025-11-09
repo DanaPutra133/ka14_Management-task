@@ -55,7 +55,7 @@
         }
 
         .dark-mode-toggle { position: fixed; top: 1rem; right: 1rem; display:flex; gap:.5rem; z-index:1000; }
-        .toggle-switch { position: relative; width: 64px; height: 28px; }
+        .toggle-switch { position: relative; width: 66px; height: 28px; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
         .toggle-switch .slider {
             position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
@@ -309,11 +309,11 @@ body.dark-theme .border-gray-200 {
                         <td class="py-3 px-6">${t.matakuliah}</td>
                         <td class="py-3 px-6">${t.Namatugas}</td>
                         <td class="py-3 px-6">${t.deadline}</td>
-                        <td class="py-3 px-6">${t.kelompok ? 'Ya' : 'Tidak'}</td>
-                        <td class="py-3 px-6">${t.vclass ? 'Ya' : 'Tidak'}</td>
-                        <td class="py-3 px-6">${t.praktikum ? 'Ya' : 'Tidak'}</td>
-                        <td class="py-3 px-6">${t.ilab ? 'Ya' : 'Tidak'}</td>
-                        <td class="py-3 px-6">${t.Mandiri ? 'Ya' : 'Tidak'}</td>
+                        <td class="py-3 px-6">${t.kelompok ? '✅' : '❌'}</td>
+                        <td class="py-3 px-6">${t.vclass ? '✅' : '❌'}</td>
+                        <td class="py-3 px-6">${t.praktikum ? '✅' : '❌'}</td>
+                        <td class="py-3 px-6">${t.ilab ? '✅' : '❌'}</td>
+                        <td class="py-3 px-6">${t.Mandiri ? '✅' : '❌'}</td>
                     </tr>
                 `).join('');
         }
