@@ -527,7 +527,7 @@ app.post("/test-push", async (req, res) => {
 // Endpoint untuk unsubscribe
 app.post('/unsubscribe', express.json(), async (req, res) => {
     const endpoint = req.body.endpoint;
-    if (!endpoint) return res.status(400).json({ error: 'Invalid endpoint' });
+    if (!endpoint) return res.status(400).json({ error: 'endpoint salah/ tidak ada. (invalid endpoint)' });
     
     try {
         await prisma.pushSubscription.delete({
@@ -543,10 +543,10 @@ app.post('/unsubscribe', express.json(), async (req, res) => {
 
 const sendDiscordWebhook = async (payload) => {
   if (!process.env.DISCORD_WEBHOOK_URL)
-    return console.error("DISCORD_WEBHOOK_URL belum di set");
+    return console.error("DISCORD_WEBHOOK_URL not set in .env");
   try {
     await axios.post(process.env.DISCORD_WEBHOOK_URL, payload);
-    console.log("webhook Discord berhasil di kirim");
+    console.log("webhook Discord successfully sent");
   } catch (err) {
     console.error("Discord webhook error:", err.response?.data || err.message);
   }

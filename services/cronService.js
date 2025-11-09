@@ -18,7 +18,7 @@ async function checkDeadlines() {
             }
         });
         if (deletedMhs.count > 0) {
-            console.log(`deleted ${deletedMhs.count} tygas mahasiswa dengan deadline hari ini`);
+            console.log(`deleted ${deletedMhs.count} tugas mahasiswa dengan deadline hari ini`);
         } else {
             console.log('gak ada tugas mahasiswa untuk hari ini');
         }
