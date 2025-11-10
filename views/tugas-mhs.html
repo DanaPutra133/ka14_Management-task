@@ -335,11 +335,11 @@ body.dark-theme .border-gray-200 {
                         <td class="py-3 px-6">${t.Namatugas}</td>
                         <td class="py-3 px-6">${t.UrlGambar ? t.UrlGambar : '-'}</td>
                         <td class="py-3 px-6">${t.deadline}</td>
-                        <td class="py-3 px-6">${t.kelompok ? 'Ya' : 'Tidak'}</td>
-                        <td class="py-3 px-6">${t.vclass ? 'Ya' : 'Tidak'}</td>
-                        <td class="py-3 px-6">${t.praktikum ? 'Ya' : 'Tidak'}</td>
-                        <td class="py-3 px-6">${t.ilab ? 'Ya' : 'Tidak'}</td>
-                        <td class="py-3 px-6">${t.Mandiri ? 'Ya' : 'Tidak'}</td>
+                        <td class="py-3 px-6">${t.kelompok ? '✅' : '❌'}</td>
+                        <td class="py-3 px-6">${t.vclass ? '✅' : '❌'}</td>
+                        <td class="py-3 px-6">${t.praktikum ? '✅' : '❌'}</td>
+                        <td class="py-3 px-6">${t.ilab ? '✅' : '❌'}</td>
+                        <td class="py-3 px-6">${t.Mandiri ? '✅' : '❌'}</td>
                         <td class="py-3 px-6 flex items-center space-x-2">
                             <button onclick="editTugas(${index})" class="bg-blue-500 text-white py-1 px-3 rounded-md hover:bg-blue-600 text-xs sm:text-sm">Edit</button>
                             <button onclick="deleteTugas(${index})" class="bg-red-500 text-white py-1 px-3 rounded-md hover:bg-red-600 text-xs sm:text-sm">Hapus</button>
