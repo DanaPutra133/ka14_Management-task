@@ -523,6 +523,44 @@ app.post("/test-push", async (req, res) => {
   }
 });
 
+// ============= BE push notify on production ===============
+
+app.post("/push-notify", async (req, res) => {
+  const clientKey = req.headers["x-api-key-pro"];
+
+  if (clientKey !== process.env.PRODUCTION_PUSH) {
+    return res.status(403).json({ error: "API key push production salah atau tidak ada." });
+  }
+
+  const { title, body, icon } = req.body;
+  if (!title || !body || !icon) {
+    return res.status(400).json({ error: "title, body, icon wajib diisi." });
+  }
+
+  try {
+    const subs = await loadSubs();
+    if (!subs.length)
+      return res.status(400).json({ error: "Tidak ada subs yang terdaftar." });
+
+    let sentCount = 0;
+    for (let sub of subs) {
+      await webpush.sendNotification(
+        {
+          endpoint: sub.endpoint,
+          keys: { auth: sub.keysAuth, p256dh: sub.keysP256dh },
+        },
+        JSON.stringify({ title, body, icon })
+      );
+      sentCount++;
+    }
+
+    res.json({ success: true, sentTo: sentCount });
+  } catch (e) {
+    res.status(500).json({ error: e.message || e });
+  }
+});
+
+
 
 // Endpoint untuk unsubscribe
 app.post('/unsubscribe', express.json(), async (req, res) => {
