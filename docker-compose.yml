@@ -1,12 +1,18 @@
-
-version: '3.8'
+version: "3.9"
 
 services:
   app:
-    # Membangun image dari Dockerfile di direktori saat ini
     build: .
-    # Memetakan port 3000 di mesin Anda ke port 3000 di dalam container
+    container_name: gunadarma-scraper-api
+    restart: always
     ports:
       - "3000:3000"
-    # Secara opsional, Anda bisa memberikan nama untuk container agar mudah dikenali
-    container_name: my-node-app
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - sqlite_data:/app/prisma  # persist SQLite
+    command: ["npm", "start"]
+
+volumes:
+  sqlite_data:

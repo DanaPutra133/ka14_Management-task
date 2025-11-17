@@ -19,6 +19,8 @@ const tugasRoutes = require('./router/tugas');
 const app = express();
 const port = process.env.PORT_SERVER || process.env.PORT; 
 
+const cronTimezone = process.env.TZ || "Asia/Jakarta";
+
 // Jangan di hapus, ini buat contoh webhook discord
 // async function sendDiscordWebhook(message) {
 //     if (!DISCORD_WEBHOOK_URL) {
@@ -441,7 +443,6 @@ const sendPushReminders = async (type) => {
     }
 };
 
-const cronTimezone = process.env.TZ || null;
 
 
 
@@ -452,14 +453,14 @@ cron.schedule('0 19 * * *', () => {
     console.log('Cron 19:00 triggered at', now.toISOString());
     sendPushReminders('H-3');
     sendPushReminders('H-1');
-}, cronTimezone ? { timezone: cronTimezone } : {});
+},{ timezone: cronTimezone });
 
 // INI YANG HARI H tugas
 cron.schedule('0 7 * * *', () => {
     const now = new Date();
     console.log('Cron 05:00 triggered at', now.toISOString());
     sendPushReminders('H');
-}, cronTimezone ? { timezone: cronTimezone } : {});
+}, { timezone: cronTimezone });
 
 
 // ngetest push notification
@@ -669,7 +670,7 @@ cron.schedule(
     sendRemindersForType("H-3");
     sendRemindersForType("H-1");
   },
-  process.env.TZ ? { timezone: process.env.TZ } : {}
+  { timezone: cronTimezone }
 );
 
 cron.schedule(
@@ -678,7 +679,7 @@ cron.schedule(
     console.log("cron 07:00 trigger - Deadline H");
     sendRemindersForType("H");
   },
-  process.env.TZ ? { timezone: process.env.TZ } : {}
+  { timezone: cronTimezone }
 );
 
 // ========== DI MATIKAN SEMENTARA UNTUK PENGUJIAN AJA ==========

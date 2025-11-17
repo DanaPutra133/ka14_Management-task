@@ -42,10 +42,23 @@ async function checkDeadlines() {
     }
 }
 
-const scheduledTask = cron.schedule('0 23 * * *', () => {
-    console.log('menjalakan hapus otomatis (Prisma)...');
+const scheduledTask = cron.schedule(
+  "0 23 * * *",
+  () => {
+    console.log("menjalakan hapus otomatis (Prisma)...");
     checkDeadlines();
-});
+  },
+  {
+    timezone: "Asia/Jakarta",
+  }
+);
+
+//cek log timezone server
+console.log(
+  "Local time (WIB):",
+  new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta" })
+);
+console.log("Current time:", new Date());
 
 scheduledTask.start();
 
