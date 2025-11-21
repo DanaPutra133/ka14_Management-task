@@ -18,6 +18,8 @@ model TugasMhs {
   praktikum  Boolean  @default(false)
   ilab       Boolean  @default(false)
   Mandiri    Boolean  @default(false)
+  createdBy  String?
+  updatedBy  String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }

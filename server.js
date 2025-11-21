@@ -53,16 +53,29 @@ app.set('json spaces', 2);
 app.set('trust proxy', 1);
 
 app.use(session({
-    secret: process.env.SESSION_SECRET, 
+    secret: process.env.SESSION_SECRET || "secret-default",
     resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false } 
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 60 * 60 * 1000,
+        httpOnly: false,
+    },
 }));
+
+const VALID_NPMS = process.env.VALID_NPMS?.split(",") || [];
+function requireLogin(req, res, next) {
+    if (!req.session.user) {
+        return res.redirect("/login.html");
+    }
+    next();
+}
+
+app.use("/protected", requireLogin, express.static("protected"));
 
 
 
 function isAuthenticated(req, res, next) {
-    if (req.session && req.session.isLoggedIn) {
+    if (req.session && req.session.user) {
         return next();
     }
     res.redirect('/login');
@@ -113,7 +126,8 @@ app.post('/tugas/mahasiswa', async (req, res) => {
                 vclass: !!body.vclass,
                 praktikum: !!body.praktikum,
                 ilab: !!body.ilab,
-                Mandiri: !!body.Mandiri
+                Mandiri: !!body.Mandiri,
+                createdBy: req.session.user?.npm
             }
         });
         return res.status(201).json({
@@ -145,7 +159,8 @@ app.put('/tugas/mahasiswa/:index', async (req, res) => {
                 vclass: body.vclass ?? rows[idx].vclass,
                 praktikum: body.praktikum ?? rows[idx].praktikum,
                 ilab: body.ilab ?? rows[idx].ilab,
-                Mandiri: body.Mandiri ?? rows[idx].Mandiri
+                Mandiri: body.Mandiri ?? rows[idx].Mandiri,
+                updatedBy: req.session.user?.npm
             }
         });
         return res.json({
@@ -269,18 +284,31 @@ app.get('/login', (req, res) => {
 app.get('/logindosen', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'logindosen.html'));
 });
-app.post('/login', (req, res) => {
+app.post("/login", (req, res) => {
     const { npm } = req.body;
-    const validNPMs = process.env.VALID_NPMS
-        ? process.env.VALID_NPMS.split(',').map(s => s.trim()).filter(Boolean)
-        : [''];
 
-    if (validNPMs.includes(npm)) {
-        req.session.isLoggedIn = true;
-        res.json({ success: true, redirect: '/tugas-mahasiswa' });
-    } else {
-        res.status(401).json({ success: false, message: 'Pin tidak valid!' });
+    if (!npm) {
+        return res.status(400).json({ success: false, message: "Pin / NPM wajib diisi" });
     }
+
+    const isValid = VALID_NPMS.includes(npm);
+
+    if (!isValid) {
+        return res.status(401).json({ success: false, message: "PIN salah / tidak terdaftar" });
+    }
+
+    console.log("NPM input:", npm);
+    console.log("Valid list:", isValid);
+
+    // Simpan session login
+    req.session.user = { npm };
+    console.log("User logged in:", req.session.user);
+
+    return res.json({
+        success: true,
+        message: "Login berhasil",
+        redirect: "/tugas-mahasiswa",
+    });
 });
 
 app.post('/logindosen', (req, res) => {
@@ -290,21 +318,38 @@ app.post('/logindosen', (req, res) => {
         : [''];
 
     if (validNPMsDosen.includes(npm)) {
-        req.session.isLoggedIn = true;
+        req.session.user = { npm, role: "dosen" };
         res.json({ success: true, redirect: '/tugas-dosen' });
     } else {
         res.status(401).json({ success: false, message: 'Pin tidak valid!' });
     }
 });
 
+app.post('/logout', (req, res) => {
+    req.session.destroy(() => {
+        res.clearCookie('connect.sid');
+        res.json({ success: true });
+    });
+});
+
+
+app.get("/api/check-session", (req, res) => {
+    if (req.session && req.session.user) {
+        return res.json({ loggedIn: true, user: req.session.user });
+    }
+    res.json({ loggedIn: false });
+});
+
+
+
 // pengaman agar gak langsung masuk ke endpoint tugas-mahasiswa dan tugas-dosen
 
 app.get('/tugas-mahasiswa', isAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'tugas-mhs.html'));
+    res.sendFile(path.join(__dirname, 'views', '/protected/tugas-mhs.html'));
 });
 
 app.get('/tugas-dosen', isAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'tugas-dosen.html'));
+    res.sendFile(path.join(__dirname, 'views', '/protected/tugas-dosen.html'));
 });
 
 // const getJKalenderAkademik = require('./scrapers/BAAK_Kalender');
