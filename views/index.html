@@ -548,23 +548,6 @@
                 </tbody>
             </table>
         </div>
-
-
-
-
-
-
-        <!-- <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-top: 2rem;">
-            <img src="./logo/docker.svg" alt="Docker Logo" style="width: 100px; height: auto;" data-aos="fade-up" data-aos-delay="100">
-            <img src="./logo/intel.svg" alt="Intel Logo" style="width: 100px; height: auto;" data-aos="fade-up" data-aos-delay="200">
-            <img src="./logo/javascript.svg" alt="JavaScript Logo" style="width: 100px; height: auto;" data-aos="fade-up" data-aos-delay="300">
-            <img src="./logo/nodedotjs.svg" alt="nodedotjs Logo" style="width: 100px; height: auto;" data-aos="fade-up" data-aos-delay="400">
-            <img src="./logo/npm.svg" alt="npm Logo" style="width: 100px; height: auto;" data-aos="fade-up" data-aos-delay="500">
-            <img src="./logo/termius.svg" alt="termius Logo" style="width: 100px; height: auto;" data-aos="fade-up" data-aos-delay="600">
-            <img src="./logo/github.svg" alt="github Logo" style="width: 100px; height: auto;" data-aos="fade-up" data-aos-delay="600">
-            <img src="./logo/pm2.svg" alt="pm2 Logo" style="width: 100px; height: auto;" data-aos="fade-up" data-aos-delay="600">
-            <img src="./logo/cloudflare.svg" alt="cloudflare Logo" style="width: 100px; height: auto;" data-aos="fade-up" data-aos-delay="600">
-      </div> -->
         
         <div data-aos="fade-up" data-aos-duration="2000" class="contact-form-section">
             <h2 style="text-align:center; margin-top: 3rem;">Saran & Pesan</h2>
@@ -639,7 +622,6 @@
         updateClock();
 
         function tryApi(endpoint) {
-            // window.open(endpoint, '_blank'); // jaga jaga biar semua button jadi blank pas di klik
             window.open(endpoint);
         }
 
@@ -648,16 +630,12 @@
         // }
 
 
-        // fetchGempaData(); // Uncomment jika Anda memiliki bagian gempa di HTML
-
         const darkModeSwitch = document.getElementById("darkModeSwitch");
         const savedDarkMode = localStorage.getItem('darkMode') === 'true';
 
-        // Set initial state based on saved preference
         darkModeSwitch.checked = savedDarkMode;
         document.body.classList.toggle("dark-theme", savedDarkMode);
 
-        // Add event listener for toggle
         darkModeSwitch.addEventListener("change", () => {
             document.body.classList.toggle("dark-theme", darkModeSwitch.checked);
             localStorage.setItem('darkMode', darkModeSwitch.checked);
