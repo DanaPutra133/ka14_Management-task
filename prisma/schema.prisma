@@ -13,6 +13,7 @@ model TugasMhs {
   matakuliah String
   Namatugas  String
   UrlGambar  String?
+  Noted      String?
   deadline   DateTime
   kelompok   Boolean  @default(false)
   vclass     Boolean  @default(false)
@@ -23,6 +24,8 @@ model TugasMhs {
   updatedBy  String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  userProgress UserTaskProgress[]
 }
 
 model TugasDosen {
@@ -45,4 +48,30 @@ model PushSubscription {
   keysAuth  String
   keysP256dh String
   createdAt DateTime @default(now())
+}
+
+model User {
+  npm        String   @id 
+  pin        String  
+  email      String
+  isApproved Boolean  @default(false) 
+  isEditor   Boolean  @default(false)
+  lastLogin  DateTime?
+  createdAt  DateTime @default(now())
+  
+  // Relasi ke progres tugas
+  taskProgress UserTaskProgress[]
+}
+
+model UserTaskProgress {
+  id         Int      @id @default(autoincrement())
+  userNpm    String
+  tugasId    Int
+  isCompleted Boolean @default(false) 
+  catatan    String? 
+  
+  user       User     @relation(fields: [userNpm], references: [npm])
+  tugas      TugasMhs @relation(fields: [tugasId], references: [id], onDelete: Cascade)
+
+  @@unique([userNpm, tugasId]) 
 }

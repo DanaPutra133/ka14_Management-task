@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Tugas Mahasiswa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: { bg: '#0f172a', card: '#1e293b', text: '#e2e8f0' },
+                        primary: { DEFAULT: '#2563eb', hover: '#1d4ed8' }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Poppins', sans-serif; transition: background-color 0.3s, color 0.3s; }
+        
+        .task-card { transition: all 0.3s ease; }
+        .task-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1); }
+        
+        .custom-checkbox {
+            appearance: none; background-color: transparent; margin: 0; font: inherit; color: currentColor;
+            width: 1.4em; height: 1.4em; border: 2px solid currentColor; border-radius: 0.35em;
+            display: grid; place-content: center; cursor: pointer; transition: 0.2s;
+        }
+        .custom-checkbox::before {
+            content: ""; width: 0.8em; height: 0.8em; transform: scale(0);
+            transition: 120ms transform ease-in-out; box-shadow: inset 1em 1em white;
+            transform-origin: center; clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        }
+        .custom-checkbox:checked { background-color: #10B981; border-color: #10B981; }
+        .custom-checkbox:checked::before { transform: scale(1); }
+
+        .loader {
+            border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%;
+            width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        #progressBar { transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        .filter-btn.active { background-color: #2563eb; color: white; border-color: #2563eb; }
+        .dark .filter-btn.active { background-color: #3b82f6; border-color: #3b82f6; }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 dark:bg-dark-bg dark:text-dark-text min-h-screen p-4 sm:p-6 lg:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        
+        <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Dashboard Tugas</h1>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">Kelola tugas akademikmu dengan mudah</p>
+            </div>
+
+            <div class="flex items-center gap-2 bg-white dark:bg-dark-card p-1.5 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                <button onclick="setLayout('list')" id="btnList" class="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition" title="List"><i class="ph ph-list-dashes text-xl"></i></button>
+                <button onclick="setLayout('grid')" id="btnGrid" class="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition" title="Grid"><i class="ph ph-squares-four text-xl"></i></button>
+                <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                <button onclick="toggleDarkMode()" class="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition text-yellow-500"><i id="themeIcon" class="ph ph-sun text-xl"></i></button>
+                <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                <button onclick="logout()" class="flex items-center gap-2 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 rounded text-sm font-medium transition"><i class="ph ph-sign-out"></i> Keluar</button>
+            </div>
+        </header>
+
+        <div class="bg-white dark:bg-dark-card rounded-xl border border-gray-200 dark:border-gray-700 p-5 mb-6 shadow-sm">
+            <div class="flex justify-between items-center mb-2">
+                <div>
+                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-300 block">Progres Keseluruhan</span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400" id="progressText">Menghitung data...</span>
+                </div>
+                <span class="text-2xl font-bold text-primary dark:text-blue-400" id="progressPercent">0%</span>
+            </div>
+            
+            <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+                <div id="progressBar" class="bg-blue-600 dark:bg-blue-500 h-full rounded-full" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+            <button onclick="setFilter('all')" class="filter-btn active px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="all">Semua</button>
+            <button onclick="setFilter('kelompok')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="kelompok">Kelompok</button>
+            <button onclick="setFilter('vclass')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="vclass">VClass</button>
+            <button onclick="setFilter('praktikum')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="praktikum">Praktikum</button>
+            <button onclick="setFilter('ilab')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="ilab">iLab</button>
+            <button onclick="setFilter('mandiri')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="mandiri">Mandiri</button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <div class="bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700 p-4 rounded-xl flex items-center justify-between shadow-sm">
+                <div><p class="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wide">Total Tugas</p><h2 class="text-2xl font-bold text-gray-800 dark:text-white mt-1" id="totalCount">0</h2></div>
+                <div class="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-600 dark:text-blue-400"><i class="ph ph-books text-2xl"></i></div>
+            </div>
+            <div class="bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700 p-4 rounded-xl flex items-center justify-between shadow-sm">
+                <div><p class="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wide">Selesai</p><h2 class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1" id="doneCount">0</h2></div>
+                <div class="p-2 bg-green-50 dark:bg-green-900/20 rounded-lg text-green-600 dark:text-green-400"><i class="ph ph-check-circle text-2xl"></i></div>
+            </div>
+            <div class="bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700 p-4 rounded-xl flex items-center justify-between shadow-sm">
+                <div><p class="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wide">Belum</p><h2 class="text-2xl font-bold text-red-600 dark:text-red-400 mt-1" id="pendingCount">0</h2></div>
+                <div class="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg text-red-600 dark:text-red-400"><i class="ph ph-clock text-2xl"></i></div>
+            </div>
+        </div>
+
+        <div id="loading" class="hidden"><div class="loader"></div></div>
+        <div id="taskContainer" class="grid gap-4 transition-all duration-300"></div>
+
+    </div>
+    <div id="universalModal" class="fixed inset-0 z-[999] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 transition-opacity duration-300" onclick="closeModal()">
+        <div class="relative bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[85vh] flex flex-col overflow-hidden transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
+            
+            <div class="flex justify-between items-center mb-4 border-b border-gray-200 dark:border-gray-700 pb-3">
+                <h3 id="modalTitle" class="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                    </h3>
+                <button onclick="closeModal()" class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                    <i class="ph ph-x text-lg"></i>
+                </button>
+            </div>
+
+            <div class="overflow-y-auto pr-2 custom-scrollbar">
+                <img id="modalImage" src="" alt="Preview" class="hidden w-full h-auto object-contain rounded-lg shadow-sm">
+                <div id="modalText" class="hidden text-gray-700 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-wrap bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg border border-gray-100 dark:border-gray-700"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentLayout = localStorage.getItem('layout') || 'list';
+        let isDarkMode = localStorage.getItem('theme') === 'dark';
+        let activeFilter = 'all';
+        let globalTasks = [];
+
+        function initTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+            if (isDarkMode) {
+                html.classList.add('dark');
+                icon.classList.replace('ph-sun', 'ph-moon');
+            } else {
+                html.classList.remove('dark');
+                icon.classList.replace('ph-moon', 'ph-sun');
+            }
+        }
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+            initTheme();
+        }
+
+        function setLayout(mode) {
+            currentLayout = mode;
+            localStorage.setItem('layout', mode);
+            updateLayoutUI();
+            renderTasks(); 
+        }
+        function updateLayoutUI() {
+            const btnList = document.getElementById('btnList');
+            const btnGrid = document.getElementById('btnGrid');
+            const container = document.getElementById('taskContainer');
+            const activeClass = ['bg-blue-100', 'text-blue-600', 'dark:bg-blue-900', 'dark:text-blue-300'];
+            
+            btnList.classList.remove(...activeClass);
+            btnGrid.classList.remove(...activeClass);
+
+            if (currentLayout === 'list') {
+                btnList.classList.add(...activeClass);
+                container.className = 'flex flex-col gap-4';
+            } else {
+                btnGrid.classList.add(...activeClass);
+                container.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+            }
+        }
+
+        function setFilter(filter) {
+            activeFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if(btn.dataset.filter === filter) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+            renderTasks();
+        }
+
+        async function loadDashboard() {
+            const loader = document.getElementById('loading');
+            loader.classList.remove('hidden');
+
+            try {
+                const res = await fetch('/api/student/dashboard');
+                if (res.status === 401) { window.location.href = '/login.html'; return; }
+                const tasks = await res.json();
+                
+                globalTasks = tasks.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+                
+                loader.classList.add('hidden');
+                checkIfEditor(); 
+                renderTasks(); 
+                updateStats(); 
+            } catch (e) {
+                console.error(e);
+                loader.classList.add('hidden');
+            }
+        }
+
+        async function checkIfEditor() {
+            try {
+                const res = await fetch('/api/check-session');
+                const data = await res.json();
+                const header = document.querySelector('header .flex.items-center');
+
+                if (data.user && data.user.isEditor) {
+                    if(!document.getElementById('btnEditor')) {
+                        const btn = document.createElement('a');
+                        btn.id = 'btnEditor';
+                        btn.href = '/editor-tugas.html';
+                        btn.className = 'p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition text-purple-600 dark:text-purple-400';
+                        btn.title = "Mode Editor";
+                        btn.innerHTML = '<i class="ph ph-pencil-simple-line text-xl"></i>';
+                        header.insertBefore(btn, header.children[0]);
+                    }
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        // RENDER LOGIC
+        function renderTasks() {
+            const container = document.getElementById('taskContainer');
+            container.innerHTML = '';
+
+            const filteredTasks = globalTasks.filter(t => {
+                if (activeFilter === 'all') return true;
+                if (activeFilter === 'kelompok') return t.kelompok;
+                if (activeFilter === 'vclass') return t.vclass;
+                if (activeFilter === 'praktikum') return t.praktikum;
+                if (activeFilter === 'ilab') return t.ilab;
+                if (activeFilter === 'mandiri') return t.Mandiri;
+                return true;
+            });
+
+            if (filteredTasks.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-20 text-gray-400"><p>Tidak ada tugas di kategori ini.</p></div>`;
+                return;
+            }
+
+            filteredTasks.forEach(t => {
+                const deadlineDate = new Date(t.deadline);
+                const diffDays = Math.ceil((deadlineDate - new Date()) / (1000 * 60 * 60 * 24)); 
+                
+                let badgeClass = 'bg-blue-50 text-blue-700 border border-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800';
+                let badgeText = `${diffDays} Hari Lagi`;
+                
+                if (t.isCompleted) {
+                    badgeClass = 'bg-green-50 text-green-700 border border-green-100 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800';
+                    badgeText = 'Selesai';
+                } else if(diffDays < 0) {
+                    badgeClass = 'bg-gray-100 text-gray-600 border border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700';
+                    badgeText = 'Terlewat';
+                } else if(diffDays === 0) {
+                    badgeClass = 'bg-red-50 text-red-700 border border-red-100 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800';
+                    badgeText = 'Hari Ini!';
+                } else if(diffDays <= 3) {
+                    badgeClass = 'bg-yellow-50 text-yellow-700 border border-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800';
+                }
+
+                const tags = [
+                    t.kelompok ? {l:'Kelompok', c:'indigo'} : null,
+                    t.vclass ? {l:'VClass', c:'purple'} : null,
+                    t.Mandiri ? {l:'Mandiri', c:'orange'} : null,
+                    t.praktikum ? {l:'Praktikum', c:'pink'} : null,
+                    t.ilab ? {l:'iLab', c:'teal'} : null,
+                ].filter(Boolean).map(tag => `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-${tag.c}-50 text-${tag.c}-700 border border-${tag.c}-100 dark:bg-${tag.c}-900/30 dark:text-${tag.c}-300 dark:border-${tag.c}-800">${tag.l}</span>`).join('');
+
+                const statusClass = t.isCompleted ? 'border-l-4 border-green-500 opacity-90' : 'border-l-4 border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500';
+                const textColor = t.isCompleted ? 'text-gray-400 line-through dark:text-gray-500' : 'text-gray-800 dark:text-gray-100';
+
+                const imgBtn = t.UrlGambar ? 
+                    `<button onclick="openModal('image', '${t.UrlGambar}')" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1.5 text-xs font-semibold bg-blue-50 dark:bg-blue-900/20 px-2.5 py-1.5 rounded-lg transition border border-blue-100 dark:border-blue-800/50">
+                        <i class="ph ph-image text-lg"></i> Soal
+                    </button>` : '';
+
+                const safeNote = t.Noted ? t.Noted.replace(/'/g, "\\'").replace(/"/g, '&quot;') : '';
+                const noteBtn = t.Noted ? 
+                    `<button onclick="openModal('text', '${safeNote}')" class="text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 flex items-center gap-1.5 text-xs font-semibold bg-purple-50 dark:bg-purple-900/20 px-2.5 py-1.5 rounded-lg transition border border-purple-100 dark:border-purple-800/50">
+                        <i class="ph ph-info text-lg"></i> Catatan
+                    </button>` : '';
+
+                const actionButtons = `<div class="flex gap-2">${imgBtn}${noteBtn}</div>`;
+
+                let html = '';
+                if (currentLayout === 'list') {
+                    html = `
+                    <div class="task-card ${statusClass} relative p-4 rounded-xl bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                        <div class="flex-shrink-0 pt-1 sm:pt-0">
+                            <input type="checkbox" class="custom-checkbox text-green-500 border-gray-300 dark:border-gray-500" onchange="toggleTask(${t.id}, this.checked)" ${t.isCompleted ? 'checked' : ''}>
+                        </div>
+                        <div class="flex-grow w-full">
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-1">
+                                <h3 class="font-bold text-lg ${textColor}">${t.matakuliah}</h3>
+                                <div class="flex gap-2 items-center self-start sm:self-auto">
+                                    ${actionButtons} <span class="px-2.5 py-0.5 rounded text-xs font-medium ${badgeClass}">${badgeText}</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap gap-2 items-center mb-2">
+                                <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">${t.Namatugas}</span>
+                                <span class="text-xs text-gray-400">| ${deadlineDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+                            </div>
+                            <div class="flex gap-2 mb-3">${tags}</div>
+                            <input type="text" value="${t.catatan || ''}" placeholder="Tulis catatan..." class="w-full bg-transparent border-b border-gray-200 dark:border-gray-700 text-sm py-1 text-gray-600 dark:text-gray-300 focus:outline-none focus:border-blue-500 transition-colors" onblur="saveNote(${t.id}, this.value)">
+                        </div>
+                    </div>`;
+                } else {
+                    html = `
+                    <div class="task-card ${statusClass} flex flex-col justify-between h-full p-5 rounded-xl bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700">
+                        <div class="flex justify-between items-start mb-3">
+                            <input type="checkbox" class="custom-checkbox text-green-500 border-gray-300 dark:border-gray-500" onchange="toggleTask(${t.id}, this.checked)" ${t.isCompleted ? 'checked' : ''}>
+                            <span class="px-2.5 py-0.5 rounded text-xs font-medium ${badgeClass}">${badgeText}</span>
+                        </div>
+                        <div class="mb-4">
+                            <div class="flex justify-between items-start mb-1">
+                                <h3 class="font-bold text-lg leading-tight ${textColor}">${t.matakuliah}</h3>
+                                ${actionButtons}
+                            </div>
+                            <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">${t.Namatugas}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-1"><i class="ph ph-calendar"></i> ${deadlineDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                            <div class="flex flex-wrap gap-2">${tags}</div>
+                        </div>
+                        <div class="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700 flex items-center gap-2 text-gray-400">
+                            <i class="ph ph-pencil-simple text-sm"></i>
+                            <input type="text" value="${t.catatan || ''}" placeholder="Catatan..." class="w-full bg-transparent text-xs focus:outline-none text-gray-600 dark:text-gray-300" onblur="saveNote(${t.id}, this.value)">
+                        </div>
+                    </div>`;
+                }
+                container.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        function updateStats() {
+            const tasks = globalTasks;
+            const total = tasks.length;
+            const done = tasks.filter(t => t.isCompleted).length;
+            
+            document.getElementById('totalCount').innerText = total;
+            document.getElementById('doneCount').innerText = done;
+            document.getElementById('pendingCount').innerText = total - done;
+
+            const percent = total === 0 ? 0 : Math.round((done / total) * 100);
+            const bar = document.getElementById('progressBar');
+            bar.style.width = `${percent}%`;
+            
+            if(percent === 100) {
+                bar.className = "bg-green-500 h-full rounded-full transition-all duration-700";
+            } else {
+                bar.className = "bg-blue-600 dark:bg-blue-500 h-full rounded-full transition-all duration-700";
+            }
+
+            document.getElementById('progressPercent').innerText = `${percent}%`;
+            
+            const textEl = document.getElementById('progressText');
+            if (total === 0) textEl.innerText = "Tidak ada tugas aktif.";
+            else if (percent === 0) textEl.innerText = "Ayo mulai cicil tugasmu!";
+            else if (percent < 50) textEl.innerText = "Terus semangat, perjalanan masih panjang.";
+            else if (percent < 100) textEl.innerText = "Sedikit lagi selesai!";
+            else textEl.innerText = "Kerja bagus! Semua tugas selesai.";
+        }
+
+        function openModal(type, content) {
+            const modal = document.getElementById('universalModal');
+            const titleEl = document.getElementById('modalTitle');
+            const imgEl = document.getElementById('modalImage');
+            const textEl = document.getElementById('modalText');
+
+            imgEl.classList.add('hidden');
+            textEl.classList.add('hidden');
+
+            if (type === 'image') {
+                titleEl.innerHTML = '<i class="ph ph-image text-blue-500"></i>Gambar';
+                imgEl.src = content;
+                imgEl.classList.remove('hidden');
+            } else {
+                titleEl.innerHTML = '<i class="ph ph-note text-purple-500"></i> Catatan Tambahan';
+                textEl.innerText = content; 
+                textEl.classList.remove('hidden');
+            }
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.firstElementChild.classList.remove('scale-95');
+                modal.firstElementChild.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('universalModal');
+            modal.classList.add('opacity-0');
+            modal.firstElementChild.classList.remove('scale-100');
+            modal.firstElementChild.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('modalImage').src = "";
+            }, 300);
+        }
+
+        async function toggleTask(id, status) {
+            try {
+                const task = globalTasks.find(t => t.id === id);
+                if(task) task.isCompleted = status;
+                
+                renderTasks(); 
+                updateStats(); 
+
+                await fetch('/api/student/toggle-task', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tugasId: id, isCompleted: status })
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        async function saveNote(id, note) {
+            try {
+                const task = globalTasks.find(t => t.id === id);
+                if(task) task.catatan = note;
+
+                await fetch('/api/student/save-note', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tugasId: id, note: note })
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        async function logout() {
+            await fetch('/logout', { method: 'POST' });
+            window.location.href = '/';
+        }
+
+        initTheme();
+        updateLayoutUI();
+        loadDashboard();
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Manajemen Tugas & Notifikasi</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="../img/splash1.png">
+    
+    <style>
+        body { font-family: 'Poppins', sans-serif; transition: background-color 0.3s ease, color 0.3s ease; }
+        
+        label.cb-container {
+            font-family: "Montserrat", sans-serif;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: block;
+            position: relative;
+        }
+        label.cb-container > input { display: none; }
+        label.cb-container span { color: #6A759B; margin-left: 10px; }
+        label.cb-container i {
+            display: inline-block; width: 44px; height: 20px; border-radius: 20px;
+            vertical-align: middle; transition: .25s .09s; position: relative; background: #deeff7;
+        }
+        label.cb-container i::after {
+            content: ""; display: block; width: 20px; height: 20px; top: 0.1px; left: 1px;
+            border-radius: 50%; background: #fff; position: absolute; box-shadow: 1px 2px 4px rgba(0,0,0,.4);
+            transition: .15s;
+        }
+        label.cb-container > input:checked + i { background: #1094fb; }
+        label.cb-container > input:checked + i + span { color: #29316b; }
+        label.cb-container > input:checked + i::after { transform: translateX(25px); }
+
+        :root {
+            --bg-default: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-default: #111827;
+            --muted-text: #4b5563;
+            --table-bg: #ffffff;
+            --table-border: #e5e7eb;
+            --hover-row: #f3f4f6;
+            --input-bg: #ffffff;
+            --input-border: #d1d5db;
+            --btn-primary: #2563eb;
+            --thead-bg: rgba(229,231,235,0.9);
+        }
+        body.dark-theme {
+            --bg-default: #071022;
+            --card-bg: #0b1220;
+            --text-default: #e6eef8;
+            --muted-text: #9aa9bf;
+            --table-bg: #071022;
+            --table-border: #1f2937;
+            --hover-row: rgba(255,255,255,0.03);
+            --input-bg: rgba(255,255,255,0.02);
+            --input-border: #24303b;
+            --btn-primary: #1e40af;
+            --thead-bg: rgba(255,255,255,0.03);
+        }
+
+        body {
+            background-color: var(--bg-default);
+            color: var(--text-default);
+        }
+
+        .card-bg-override {
+            background-color: var(--card-bg) !important;
+            color: var(--text-default);
+        }
+
+        .dark-theme .bg-white { background-color: var(--card-bg) !important; }
+        .dark-theme .bg-gray-100 { background-color: var(--card-bg) !important; }
+        .dark-theme .bg-gray-200 { background-color: var(--thead-bg) !important; }
+        .dark-theme .text-gray-700, .dark-theme .text-gray-600 { color: var(--muted-text) !important; }
+        .dark-theme .border-gray-300, .dark-theme .border-gray-200 { border-color: var(--table-border) !important; }
+
+        table {
+            background-color: var(--table-bg);
+            border-color: var(--table-border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            border-bottom: 1px solid var(--table-border);
+            color: var(--text-default);
+        }
+        th {
+            background-color: var(--thead-bg);
+            color: var(--text-default);
+            font-weight: 600;
+        }
+        tr:hover { background-color: var(--hover-row); }
+
+        /* Inputs */
+        input[type="text"], input[type="date"], input[type="password"], textarea {
+            background-color: var(--input-bg);
+            color: var(--text-default);
+            border: 1px solid var(--input-border);
+            padding: .5rem .6rem;
+            border-radius: .375rem;
+            width: 100%;
+            transition: border-color .15s, box-shadow .15s;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+            border-color: var(--btn-primary);
+        }
+
+        @media (min-width: 640px) {
+            fieldset { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-top: 20px; }
+        }
+
+        .hidden { display: none !important; }
+        .admin-section {
+            border: 1px solid var(--input-border);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background: var(--card-bg);
+        }
+        .admin-badge {
+            background-color: var(--btn-primary);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+        
+        .floating-theme-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="floating-theme-toggle">
+        <button onclick="toggleDarkMode()" class="p-2 rounded-full bg-white border border-gray-200 shadow-md text-yellow-500 hover:scale-110 transition-transform dark:bg-gray-800 dark:border-gray-700">
+            <i id="themeIcon" class="ph ph-sun text-xl"></i>
+        </button>
+    </div>
+
+    <div id="loginCard" class="flex items-center justify-center min-h-screen">
+        <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-md card-bg-override">
+            <div class="text-center mb-6">
+                <h1 class="text-2xl font-bold">Admin Login</h1>
+                <p class="text-sm text-gray-500 mt-2">Masukkan PIN Admin untuk mengakses panel.</p>
+            </div>
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">PIN Admin</label>
+                    <input type="password" id="adminPin" placeholder="******" required class="block w-full">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">Masuk</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="dashboardCard" class="hidden container mx-auto p-4 sm:p-6 lg:p-8">
+        
+        <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+            <h1 class="text-3xl font-bold mb-4 sm:mb-0">Admin Dashboard <span class="admin-badge">Admin</span></h1>
+            
+            <div class="flex gap-2">
+                <a href="/admin-users" class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 shadow-md text-sm flex items-center gap-2 transition">
+                    <i class="ph ph-users"></i> Kelola User
+                </a>
+                
+                <button onclick="logout()" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 shadow-md text-sm flex items-center gap-2 transition">
+                    <i class="ph ph-sign-out"></i> Logout
+                </button>
+            </div>
+        </div>
+
+        <div class="admin-section card-bg-override shadow-md">
+            <h2 class="text-xl font-bold mb-4 border-b pb-2" style="border-color: var(--input-border);">Pusat Notifikasi</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-semibold mb-2">Broadcast Web Push</h3>
+                    <div class="space-y-2">
+                        <input type="text" id="pushTitle" placeholder="Judul Notifikasi">
+                        <textarea id="pushBody" rows="2" placeholder="Pesan untuk semua user..."></textarea>
+                        <button onclick="sendBroadcast()" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Kirim Broadcast</button>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-semibold mb-2">Custom Discord Message</h3>
+                    <div class="space-y-2">
+                        <textarea id="discordMsg" rows="5" placeholder="Pesan chat ke channel Discord..."></textarea>
+                        <button onclick="sendCustomDiscord()" class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">Kirim ke Discord</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full bg-white rounded-lg shadow-md card-bg-override p-4 sm:p-6 mb-10">
+            <h2 class="text-xl sm:text-2xl font-bold mb-4 text-center">Manajemen Tugas Mahasiswa 3ka14</h2>
+
+            <form id="tugasForm" class="space-y-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="matakuliah" class="block text-sm sm:text-base font-medium">Mata Kuliah:</label>
+                        <input type="text" id="matakuliah" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="deadline" class="block text-sm sm:text-base font-medium">Deadline:</label>
+                        <input type="date" id="deadline" required>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="Namatugas" class="block text-sm sm:text-base font-medium">Nama Tugas:</label>
+                        <input type="text" id="Namatugas" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="UrlGambar" class="block text-sm sm:text-base font-medium">Url Gambar:</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="UrlGambar" class="flex-1" placeholder="https://...">
+                            
+                            <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="handleFileUpload(this)">
+                            
+                            <button type="button" onclick="document.getElementById('fileInput').click()" 
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-3 rounded-md transition flex items-center justify-center" 
+                                title="Upload Gambar">
+                                <i class="ph ph-cloud-arrow-up text-xl"></i>
+                            </button>
+                        </div>
+                        <p id="uploadStatus" class="text-xs text-gray-500 mt-1 hidden">Mengupload...</p>
+                    </div>
+                </div>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="Noted" class="block text-sm sm:text-base font-medium">Noted:</label>
+                        <input type="text" id="Noted" class="w-full">
+                    </div>
+                </div>
+
+                <fieldset>
+                    <label class="cb-container">
+                        <input class="cb cb1" id="kelompok" type="checkbox" name="kelompok" />
+                        <i></i> <span>Kelompok</span>
+                    </label>
+                    <label class="cb-container">
+                        <input class="cb cb2" id="vclass" type="checkbox" name="vclass" />
+                        <i></i> <span>VClass</span>
+                    </label>
+                    <label class="cb-container">
+                        <input class="cb cb3" id="praktikum" type="checkbox" name="praktikum" />
+                        <i></i> <span>Praktikum</span>
+                    </label>
+                    <label class="cb-container">
+                        <input class="cb cb4" id="ilab" type="checkbox" name="ilab" />
+                        <i></i> <span>iLab</span>
+                    </label>
+                    <label class="cb-container">
+                        <input class="cb cb5" id="Mandiri" type="checkbox" name="Mandiri" />
+                        <i></i> <span>Mandiri</span>
+                    </label>
+                </fieldset>
+                
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 text-sm sm:text-base mt-4">Simpan Tugas</button>
+            </form>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm sm:text-base">
+                    <thead>
+                        <tr class="uppercase text-xs sm:text-sm leading-normal">
+                            <th class="py-2 px-4 text-left">Mata Kuliah</th>
+                            <th class="py-2 px-4 text-left">Nama Tugas</th>
+                            <th class="py-2 px-4 text-left">Noted</th>
+                            <th class="py-2 px-4 text-left">Url</th> 
+                            <th class="py-2 px-4 text-left">Deadline<br>YYYY-MM-DD</th>
+                            <th class="py-2 px-4 text-left">Kelompok</th>
+                            <th class="py-2 px-4 text-left">Vclass</th>
+                            <th class="py-2 px-4 text-left">Praktikum</th>
+                            <th class="py-2 px-4 text-left">iLab</th>
+                            <th class="py-2 px-4 text-left">Mandiri</th>
+                            <th class="py-2 px-4 text-left">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tugasList" class="text-xs sm:text-sm font-light">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="admin-section card-bg-override shadow-md mt-6">
+            <h2 class="text-xl font-bold mb-4 border-b pb-2">Persetujuan Registrasi User</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="bg-gray-100 uppercase text-xs">
+                        <tr>
+                            <th class="px-4 py-2">NPM</th>
+                            <th class="px-4 py-2">Email</th>
+                            <th class="px-4 py-2">Waktu Daftar</th>
+                            <th class="px-4 py-2">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pendingUserList">
+                    </tbody>
+                </table>
+                <p id="noPendingMsg" class="text-center text-gray-500 py-4 hidden">Tidak ada user pending.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const themeIcon = document.getElementById('themeIcon');
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-theme');
+            themeIcon.classList.replace('ph-sun', 'ph-moon');
+        }
+
+        function toggleDarkMode() {
+            const isDark = document.body.classList.toggle('dark-theme');
+            localStorage.setItem('darkMode', isDark);
+            
+            if (isDark) {
+                themeIcon.classList.replace('ph-sun', 'ph-moon');
+            } else {
+                themeIcon.classList.replace('ph-moon', 'ph-sun');
+            }
+        }
+        const API_ADMIN = '/api/admin';
+        window.onload = () => {
+            const token = localStorage.getItem('adminToken');
+            if (token) {
+                showDashboard();
+                loadTugas(); 
+            }
+        };
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const pin = document.getElementById('adminPin').value;
+
+            try {
+                const res = await fetch(`${API_ADMIN}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pin })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    localStorage.setItem('adminToken', data.token);
+                    Swal.fire('Login Berhasil', data.message, 'success');
+                    showDashboard();
+                    loadTugas();
+                } else {
+                    Swal.fire('Gagal', data.message, 'error');
+                }
+            } catch (err) {
+                Swal.fire('Error', 'Gagal menghubungi server', 'error');
+            }
+        });
+
+        function showDashboard() {
+            document.getElementById('loginCard').classList.add('hidden');
+            document.getElementById('dashboardCard').classList.remove('hidden');
+            loadPendingUsers();
+        }
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            window.location.href = '/';
+        }
+
+        function getAuthHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
+            };
+        }
+        async function handleFileUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const status = document.getElementById('uploadStatus');
+            const urlInput = document.getElementById('UrlGambar');
+            
+            status.textContent = "Sedang mengupload...";
+            status.classList.remove('hidden', 'text-red-500', 'text-green-500');
+            status.classList.add('text-blue-500');
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const res = await fetch('/upload-proxy', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('adminToken') // Secure upload
+                    },
+                    body: formData
+                });
+
+                const data = await res.json();
+
+                if (data.url) {
+                    urlInput.value = data.url; 
+                    status.textContent = "Upload Berhasil!";
+                    status.classList.replace('text-blue-500', 'text-green-500');
+                } else {
+                    throw new Error(data.error || 'Gagal upload');
+                }
+            } catch (err) {
+                console.error(err);
+                status.textContent = "Gagal: " + err.message;
+                status.classList.replace('text-blue-500', 'text-red-500');
+            }
+        }
+
+        async function sendBroadcast() {
+            const title = document.getElementById('pushTitle').value;
+            const body = document.getElementById('pushBody').value;
+            if(!title || !body) return Swal.fire('Warning', 'Isi judul dan pesan dulu!', 'warning');
+
+            const res = await fetch(`${API_ADMIN}/push/broadcast`, {
+                method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ title, body })
+            });
+            handleResponse(res);
+        }
+
+        async function sendCustomDiscord() {
+            const message = document.getElementById('discordMsg').value;
+            if(!message) return Swal.fire('Warning', 'Pesan tidak boleh kosong', 'warning');
+
+            const res = await fetch(`${API_ADMIN}/discord/custom`, {
+                method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ message })
+            });
+            handleResponse(res);
+        }
+
+        async function handleResponse(res) {
+            const data = await res.json();
+            if (res.ok) {
+                Swal.fire('Berhasil', data.message, 'success');
+                document.getElementById('pushTitle').value = '';
+                document.getElementById('pushBody').value = '';
+                document.getElementById('discordMsg').value = '';
+            } else {
+                if(res.status === 401 || res.status === 403) {
+                    Swal.fire('Sesi Habis', 'Login ulang', 'error').then(logout);
+                } else Swal.fire('Gagal', data.error, 'error');
+            }
+        }
+
+        const form = document.getElementById('tugasForm');
+        const tugasList = document.getElementById('tugasList');
+        const checkboxes = ['kelompok', 'vclass', 'praktikum', 'ilab', 'Mandiri'].map(id => document.getElementById(id));
+        let isEditing = false;
+        let editingIndex = null;
+
+        function validateCheckboxes() {
+            const anyChecked = checkboxes.some(cb => cb.checked);
+            if (!anyChecked) {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Pilih minimal satu kategori!' });
+            }
+            return anyChecked;
+        }
+
+        async function loadTugas() {
+            try {
+                const response = await fetch('/tugas/mahasiswa', { headers: getAuthHeaders() });
+                const data = await response.json();
+                displayTugas(Array.isArray(data) ? data : []); 
+            } catch (error) {
+                console.error(error);
+                displayTugas([]);
+            }
+        }
+
+        function displayTugas(tugas) {
+            if (!Array.isArray(tugas)) tugas = [];
+            tugas.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+
+            tugasList.innerHTML = tugas.length === 0 ? 
+                '<tr><td colspan="10" class="py-3 px-6 text-center">Tidak ada tugas</td></tr>' :
+                tugas.map((t, index) => `
+                    <tr class="border-b" style="border-color: var(--table-border);">
+                        <td class="py-3 px-6">${t.matakuliah}</td>
+                        <td class="py-3 px-6">${t.Namatugas}</td>
+                        <td class="py-3 px-6">${t.Noted || '-'}</td>
+                        <td class="px-4 py-3 text-xs text-blue-500">${t.UrlGambar ? '<a href="'+t.UrlGambar+'" target="_blank">Link</a>' : '-'}</td>
+                        <td class="py-3 px-6">${t.deadline}</td>
+                        <td class="py-3 px-6">${t.kelompok ? '✅' : '❌'}</td>
+                        <td class="py-3 px-6">${t.vclass ? '✅' : '❌'}</td>
+                        <td class="py-3 px-6">${t.praktikum ? '✅' : '❌'}</td>
+                        <td class="py-3 px-6">${t.ilab ? '✅' : '❌'}</td>
+                        <td class="py-3 px-6">${t.Mandiri ? '✅' : '❌'}</td>
+                        <td class="py-3 px-6 flex items-center space-x-2">
+                            <button onclick="editTugas(${index})" class="bg-blue-600 text-white py-1 px-3 rounded hover:bg-blue-700 text-xs">Edit</button>
+                            <button onclick="deleteTugas(${index})" class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-700 text-xs">Hapus</button>
+                        </td>
+                    </tr>
+                `).join('');
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!validateCheckboxes()) return;
+
+            const tugasData = {
+                matakuliah: document.getElementById('matakuliah').value,
+                deadline: document.getElementById('deadline').value,
+                Namatugas: document.getElementById('Namatugas').value,
+                UrlGambar: document.getElementById('UrlGambar').value,
+                Noted: document.getElementById('Noted').value,
+                kelompok: document.getElementById('kelompok').checked,
+                vclass: document.getElementById('vclass').checked,
+                praktikum: document.getElementById('praktikum').checked,
+                ilab: document.getElementById('ilab').checked,
+                Mandiri: document.getElementById('Mandiri').checked
+            };
+
+            try {
+                const url = isEditing ? `/tugas/mahasiswa/${editingIndex}` : '/tugas/mahasiswa';
+                const method = isEditing ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(tugasData)
+                });
+
+                if (!response.ok) throw new Error('Gagal menyimpan');
+
+                await Swal.fire({
+                    icon: 'success', title: 'Berhasil',
+                    text: isEditing ? 'Tugas diupdate!' : 'Tugas ditambahkan!'
+                });
+
+                form.reset();
+                isEditing = false;
+                editingIndex = null;
+                await loadTugas(); 
+            } catch (error) {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menyimpan tugas!' });
+            }
+        });
+
+        async function deleteTugas(index) {
+            const result = await Swal.fire({
+                title: 'Hapus Tugas?', icon: 'warning',
+                showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Ya, hapus!'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    await fetch(`/tugas/mahasiswa/${index}`, {
+                        method: 'DELETE', headers: getAuthHeaders()
+                    });
+                    Swal.fire('Terhapus!', 'Data dihapus.', 'success');
+                    loadTugas();
+                } catch (e) {
+                    Swal.fire('Error', 'Gagal menghapus', 'error');
+                }
+            }
+        }
+
+        async function loadPendingUsers() {
+            try {
+                const res = await fetch('/api/admin/users/pending', { headers: getAuthHeaders() });
+                const users = await res.json();
+                
+                const tbody = document.getElementById('pendingUserList');
+                const noMsg = document.getElementById('noPendingMsg');
+                tbody.innerHTML = '';
+
+                if (users.length === 0) {
+                    noMsg.classList.remove('hidden');
+                    return;
+                } else {
+                    noMsg.classList.add('hidden');
+                }
+
+                users.forEach(u => {
+                    const tr = document.createElement('tr');
+                    tr.className = "border-b hover:bg-gray-50";
+                    tr.innerHTML = `
+                        <td class="px-4 py-2 font-medium">${u.npm}</td>
+                        <td class="px-4 py-2">${u.email}</td>
+                        <td class="px-4 py-2 text-xs text-gray-500">${new Date(u.createdAt).toLocaleString()}</td>
+                        <td class="px-4 py-2 space-x-2">
+                            <button onclick="processUser('${u.npm}', 'approve')" class="bg-green-500 text-white px-3 py-1 rounded text-xs hover:bg-green-600">Approve</button>
+                            <button onclick="processUser('${u.npm}', 'reject')" class="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600">Reject</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error("Gagal load pending user", e);
+            }
+        }
+
+        async function processUser(npm, action) {
+            if(!confirm(`Yakin ingin ${action} user ${npm}?`)) return;
+
+            try {
+                const res = await fetch('/api/admin/users/approve', {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ npm, action })
+                });
+                const data = await res.json();
+                
+                if(data.success) {
+                    Swal.fire('Sukses', data.message, 'success');
+                    loadPendingUsers();
+                } else {
+                    Swal.fire('Gagal', data.error, 'error');
+                }
+            } catch (e) {
+                Swal.fire('Error', 'Kesalahan server', 'error');
+            }
+        }
+
+        async function editTugas(index) {
+            try {
+                const response = await fetch('/tugas/mahasiswa', { headers: getAuthHeaders() });
+                const data = await response.json();
+                const tugas = Array.isArray(data) ? data[index] : null;
+                if (!tugas) throw new Error('Tugas tidak ditemukan');
+
+                document.getElementById('matakuliah').value = tugas.matakuliah;
+                document.getElementById('deadline').value = tugas.deadline;
+                document.getElementById('Namatugas').value = tugas.Namatugas;
+                document.getElementById('UrlGambar').value = tugas.UrlGambar || '';
+                document.getElementById('Noted').value = tugas.Noted || '-';
+                document.getElementById('kelompok').checked = tugas.kelompok;
+                document.getElementById('vclass').checked = tugas.vclass;
+                document.getElementById('praktikum').checked = tugas.praktikum;
+                document.getElementById('ilab').checked = tugas.ilab;
+                document.getElementById('Mandiri').checked = tugas.Mandiri;
+
+                isEditing = true;
+                editingIndex = index;
+
+                Swal.fire({ icon: 'info', title: 'Mode Edit', text: 'Silakan ubah data dan klik Simpan.' });
+            } catch (error) {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal memuat data!' });
+            }
+        }
+    </script>
+</body>
+</html>

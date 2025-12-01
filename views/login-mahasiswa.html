@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Mahasiswa - 3KA14</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            bg: '#111827',   
+                            card: '#1f2937', 
+                            input: '#374151', 
+                            text: '#f3f4f6' 
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Poppins', sans-serif; transition: background-color 0.3s, color 0.3s; }
+        .hidden { display: none; }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen px-4 bg-gray-100 dark:bg-dark-bg transition-colors duration-300">
+
+    <div class="absolute top-4 right-4">
+        <button onclick="toggleDarkMode()" class="p-2 rounded-full bg-white dark:bg-dark-card shadow-md text-yellow-500 hover:scale-110 transition-transform">
+            <i id="themeIcon" class="ph ph-sun text-xl"></i>
+        </button>
+    </div>
+
+    <div class="bg-white dark:bg-dark-card p-8 rounded-xl shadow-lg w-full max-w-md fade-in transition-colors duration-300">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-blue-600 dark:text-blue-400">3KA14</h1>
+            <p class="text-gray-500 dark:text-gray-400 text-sm">Manajemen Tugas Kelas 3KA14</p>
+        </div>
+
+        <form id="authForm" class="space-y-4">
+            
+            <div id="stepNpm">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Masukkan NPM</label>
+                <input type="text" id="npmInput" 
+                    class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-dark-input dark:text-white transition-colors" 
+                    placeholder="Contoh: 10123xxx" required>
+                <button type="button" onclick="checkNpm()" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white py-2 rounded-md transition">Lanjut</button>
+            </div>
+
+            <div id="stepAuth" class="hidden space-y-4">
+                
+                <div id="statusMsg" class="p-3 rounded-md text-sm font-medium text-center"></div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Masukkan PIN</label>
+                    <input type="password" id="pinInput" 
+                        class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md p-2 bg-white dark:bg-dark-input dark:text-white transition-colors" 
+                        placeholder="******">
+                </div>
+
+                <div id="emailField" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email Aktif</label>
+                    <input type="email" id="emailInput" 
+                        class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md p-2 bg-white dark:bg-dark-input dark:text-white transition-colors" 
+                        placeholder="nama@email.com">
+                </div>
+
+                <button type="submit" id="submitBtn" class="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition">Masuk</button>
+                <button type="button" onclick="resetForm()" class="w-full text-gray-500 dark:text-gray-400 text-sm py-1 hover:underline">Ganti NPM</button>
+            </div>
+
+        </form>
+    </div>
+
+    <script>
+        const html = document.documentElement;
+        const icon = document.getElementById('themeIcon');
+                if (localStorage.getItem('theme') === 'dark') {
+            html.classList.add('dark');
+            icon.classList.replace('ph-sun', 'ph-moon');
+        }
+
+        function toggleDarkMode() {
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                icon.classList.replace('ph-moon', 'ph-sun');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                icon.classList.replace('ph-sun', 'ph-moon');
+            }
+        }
+        let currentMode = ''; 
+        document.getElementById('npmInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault(); 
+                checkNpm(); 
+            }
+        });
+
+        async function checkNpm() {
+            const npm = document.getElementById('npmInput').value.trim(); 
+            if(!npm) return Swal.fire('Error', 'Isi NPM dulu!', 'warning');
+
+            Swal.showLoading();
+
+            try {
+                const res = await fetch('/auth/check-npm', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ npm })
+                });
+                const data = await res.json();
+                Swal.close();
+
+                const stepNpm = document.getElementById('stepNpm');
+                const stepAuth = document.getElementById('stepAuth');
+                const statusMsg = document.getElementById('statusMsg');
+                const emailField = document.getElementById('emailField');
+                const submitBtn = document.getElementById('submitBtn');
+
+                if (data.status === 'INVALID') {
+                    Swal.fire('Akses Ditolak', 'NPM tidak terdaftar.', 'error');
+                } else if (data.status === 'UNREGISTERED') {
+                    // Mode REGISTRASI
+                    currentMode = 'REGISTER';
+                    stepNpm.classList.add('hidden');
+                    stepAuth.classList.remove('hidden');
+                    emailField.classList.remove('hidden');
+                    
+                    setTimeout(() => document.getElementById('pinInput').focus(), 100);
+                    statusMsg.className = 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 p-3 rounded-md text-sm text-center mb-4';
+                    statusMsg.innerText = 'NPM Valid! Silakan buat PIN & Email baru. \nPastikan data valid dan pin tidak mudah di tebak.';
+                    submitBtn.innerText = 'Daftar Sekarang';
+                    submitBtn.className = "w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"; 
+                } else if (data.status === 'REGISTERED') {
+                    currentMode = 'LOGIN';
+                    stepNpm.classList.add('hidden');
+                    stepAuth.classList.remove('hidden');
+                    emailField.classList.add('hidden');
+                    
+                    setTimeout(() => document.getElementById('pinInput').focus(), 100);
+
+                    statusMsg.className = 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 p-3 rounded-md text-sm text-center mb-4';
+                    statusMsg.innerText = `Selamat Datang Kembali, ${npm}`;
+                    submitBtn.innerText = 'Masuk Aplikasi';
+                    submitBtn.className = "w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition"; 
+                }
+
+            } catch (err) {
+                console.error(err);
+                Swal.fire('Error', 'Gagal menghubungi server.', 'error');
+            }
+        }
+
+        document.getElementById('authForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const npm = document.getElementById('npmInput').value.trim();
+            const pin = document.getElementById('pinInput').value;
+            const email = document.getElementById('emailInput').value;
+
+            if(!pin) {
+                return Swal.fire('Warning', 'PIN tidak boleh kosong', 'warning');
+            }
+
+            if (currentMode === 'REGISTER') {
+                if (pin === npm) {
+                    return Swal.fire('PIN DILARANG!', 'Jangan gunakan NPM sebagai PIN. Pakai angka lain.', 'error');
+                }
+                if (pin.length < 6) {
+                    return Swal.fire('Terlalu Pendek', 'PIN minimal 6 karakter.', 'warning');
+                }
+
+                const res = await fetch('/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ npm, pin, email })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    Swal.fire('Registrasi Berhasil', 'Silakan hubungi Dana untuk approval.', 'success').then(resetForm);
+                } else {
+                    Swal.fire('Gagal', data.error || data.message, 'error');
+                }
+
+            } else {
+                const res = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ npm, pin })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Login Berhasil',
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        window.location.href = data.redirect || '/dashboard.html';
+                    });
+                } else {
+                    Swal.fire('Gagal', data.message, 'error');
+                }
+            }
+        });
+
+        function resetForm() {
+            document.getElementById('stepNpm').classList.remove('hidden');
+            document.getElementById('stepAuth').classList.add('hidden');
+            document.getElementById('authForm').reset();
+            currentMode = '';
+            document.getElementById('npmInput').focus();
+        }
+    </script>
+</body>
+</html>
