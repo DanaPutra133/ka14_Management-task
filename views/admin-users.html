@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Mahasiswa - Admin</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="../img/splash1.png">
+    
+    <style>
+        body { font-family: 'Poppins', sans-serif; transition: background-color 0.3s ease, color 0.3s ease; }
+
+        :root {
+            --bg-default: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-default: #111827;
+            --muted-text: #4b5563;
+            --table-bg: #ffffff;
+            --table-border: #e5e7eb;
+            --hover-row: #f3f4f6;
+            --thead-bg: #f9fafb;
+            --input-bg: #ffffff;
+            --input-border: #d1d5db;
+        }
+
+        body.dark-theme {
+            --bg-default: #071022;
+            --card-bg: #0b1220;
+            --text-default: #e6eef8;
+            --muted-text: #9aa9bf;
+            --table-bg: #071022;
+            --table-border: #1f2937;
+            --hover-row: rgba(255,255,255,0.03);
+            --thead-bg: rgba(255,255,255,0.05);
+            --input-bg: rgba(255,255,255,0.02);
+            --input-border: #24303b;
+        }
+
+        body {
+            background-color: var(--bg-default);
+            color: var(--text-default);
+        }
+
+        .card-bg-override {
+            background-color: var(--card-bg) !important;
+            color: var(--text-default);
+        }
+
+        table {
+            background-color: var(--table-bg);
+            border-color: var(--table-border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            border-bottom: 1px solid var(--table-border);
+            color: var(--text-default);
+        }
+        th {
+            background-color: var(--thead-bg);
+            color: var(--text-default);
+            font-weight: 600;
+        }
+        tr:hover { background-color: var(--hover-row); }
+
+        .floating-theme-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8">
+
+    <div class="floating-theme-toggle">
+        <button onclick="toggleDarkMode()" class="p-2 rounded-full bg-white border border-gray-200 shadow-md text-yellow-500 hover:scale-110 transition-transform dark-btn-override">
+            <i id="themeIcon" class="ph ph-sun text-xl"></i>
+        </button>
+    </div>
+
+    <div class="max-w-7xl mx-auto bg-white rounded-lg shadow-md min-h-screen card-bg-override p-6">
+        
+        <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+            <div>
+                <h1 class="text-2xl font-bold flex items-center gap-2">
+                    <i class="ph ph-users text-blue-600"></i> Manajemen Mahasiswa
+                </h1>
+                <p class="text-sm text-gray-500" style="color: var(--muted-text);">Monitoring aktivitas & kelola akun</p>
+            </div>
+            <div class="space-x-2">
+                <a href="/admin" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition flex items-center gap-2 text-sm">
+                    <i class="ph ph-arrow-left"></i> Kembali ke Dashboard
+                </a>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="text-xs uppercase">
+                    <tr>
+                        <th class="px-6 py-3">NPM</th>
+                        <th class="px-6 py-3">Email</th>
+                        <th class="px-6 py-3">Terakhir Login</th>
+                        <th class="px-6 py-3">Progress Tugas</th>
+                        <th class="px-6 py-3">Status</th>
+                        <th class="px-6 py-3">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody">
+                    <tr><td colspan="6" class="text-center py-4">Memuat data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const themeIcon = document.getElementById('themeIcon');
+        const darkBtn = document.querySelector('.floating-theme-toggle button');
+
+        function updateThemeUI(isDark) {
+            if (isDark) {
+                document.body.classList.add('dark-theme');
+                themeIcon.classList.replace('ph-sun', 'ph-moon');
+                darkBtn.style.backgroundColor = '#1f2937';
+                darkBtn.style.borderColor = '#374151';
+            } else {
+                document.body.classList.remove('dark-theme');
+                themeIcon.classList.replace('ph-moon', 'ph-sun');
+                darkBtn.style.backgroundColor = '#ffffff';
+                darkBtn.style.borderColor = '#e5e7eb';
+            }
+        }
+
+        if (localStorage.getItem('darkMode') === 'true') {
+            updateThemeUI(true);
+        }
+
+        function toggleDarkMode() {
+            const isDark = document.body.classList.toggle('dark-theme');
+            localStorage.setItem('darkMode', isDark);
+            updateThemeUI(isDark);
+        }
+
+        const API_URL = '/api/admin/users';
+        
+        function getHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
+            };
+        }
+
+        if (!localStorage.getItem('adminToken')) {
+            window.location.href = '/admin';
+        }
+
+        async function loadUsers() {
+            try {
+                const res = await fetch(API_URL, { headers: getHeaders() });
+                if(res.status === 401) window.location.href = '/admin';
+                
+                const users = await res.json();
+                renderTable(users);
+            } catch (e) {
+                console.error(e);
+                Swal.fire('Error', 'Gagal memuat data user', 'error');
+            }
+        }
+
+       function renderTable(users) {
+            const tbody = document.getElementById('userTableBody');
+            tbody.innerHTML = '';
+
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">Belum ada mahasiswa.</td></tr>';
+                return;
+            }
+
+            users.forEach(u => {
+                const lastLogin = u.lastLogin 
+                    ? new Date(u.lastLogin).toLocaleString('id-ID') 
+                    : '<span class="text-red-400 italic">Belum pernah</span>';
+
+                let progressColor = 'bg-red-500';
+                if(u.progressPercent > 50) progressColor = 'bg-yellow-500';
+                if(u.progressPercent === 100) progressColor = 'bg-green-500';
+
+               const isEditor = u.isEditor; 
+                const iconClass = isEditor ? 'ph-star ph-fill' : 'ph-star'; 
+                const starColor = isEditor ? 'text-yellow-600' : 'text-yellow-400'; 
+                const starTitle = isEditor ? 'Cabut Akses Editor' : 'Jadikan Editor';
+
+                const html = `
+                    <tr class="border-b transition-colors">
+                        <td class="px-6 py-4 font-medium">${u.npm}</td>
+                        <td class="px-6 py-4">${u.email}</td>
+                        <td class="px-6 py-4">${lastLogin}</td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-semibold">${u.progress}</span>
+                                <div class="w-24 bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                                    <div class="${progressColor} h-2.5 rounded-full" style="width: ${u.progressPercent}%"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            ${u.isApproved 
+                                ? '<span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">Aktif</span>' 
+                                : '<span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-yellow-900 dark:text-yellow-300">Pending</span>'}
+                        </td>
+                        <td class="px-6 py-4 space-x-2">
+                            <button onclick="toggleEditor('${u.npm}', ${!isEditor})" class="${starColor} hover:scale-110 transition duration-200" title="${starTitle}">
+                                <i class="ph ${iconClass} text-xl"></i>
+                            </button>
+
+                            <button onclick="viewDetail('${u.npm}')" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition" title="Lihat Detail"><i class="ph ph-eye text-xl"></i></button>
+                            <button onclick="resetPin('${u.npm}')" class="text-yellow-600 hover:text-yellow-800 dark:text-yellow-500 dark:hover:text-yellow-400 transition" title="Reset PIN"><i class="ph ph-lock-key-open text-xl"></i></button>
+                            <button onclick="deleteUser('${u.npm}')" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition" title="Hapus User"><i class="ph ph-trash text-xl"></i></button>
+                        </td>
+                        
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+
+        async function toggleEditor(npm, newStatus) {
+    try {
+        const res = await fetch('/api/admin/users/toggle-editor', {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify({ npm, isEditor: newStatus })
+        });
+        const data = await res.json();
+        if(data.success) {
+            const msg = newStatus ? 'User kini menjadi EDITOR.' : 'Akses Editor dicabut.';
+            Swal.fire('Berhasil', msg, 'success');
+            loadUsers();
+        } else throw new Error(data.error);
+    } catch (e) {
+        Swal.fire('Error', e.message, 'error');
+    }
+}
+
+        async function deleteUser(npm) {
+            const result = await Swal.fire({
+                title: 'Hapus User?',
+                text: `Mahasiswa ${npm} dan semua datanya akan dihapus permanen!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Ya, Hapus!'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const res = await fetch(`${API_URL}/${npm}`, {
+                        method: 'DELETE', headers: getHeaders()
+                    });
+                    const data = await res.json();
+                    if(data.success) {
+                        Swal.fire('Terhapus', data.message, 'success');
+                        loadUsers();
+                    } else throw new Error(data.error);
+                } catch (e) {
+                    Swal.fire('Gagal', e.message, 'error');
+                }
+            }
+        }
+
+        async function resetPin(npm) {
+            const { value: newPin } = await Swal.fire({
+                title: `Reset PIN: ${npm}`,
+                input: 'text',
+                inputLabel: 'Masukkan PIN Baru',
+                inputPlaceholder: '123456',
+                showCancelButton: true
+            });
+
+            if (newPin) {
+                try {
+                    const res = await fetch(`${API_URL}/reset-pin`, {
+                        method: 'POST',
+                        headers: getHeaders(),
+                        body: JSON.stringify({ npm, newPin })
+                    });
+                    const data = await res.json();
+                    if(data.success) Swal.fire('Sukses', 'PIN berhasil diubah.', 'success');
+                } catch (e) {
+                    Swal.fire('Error', 'Gagal reset PIN', 'error');
+                }
+            }
+        }
+
+        async function viewDetail(npm) {
+            try {
+                const res = await fetch(`${API_URL}/${npm}`, { headers: getHeaders() });
+                const user = await res.json();
+                
+                let taskListHtml = '<ul class="text-left text-sm space-y-2 max-h-60 overflow-y-auto">';
+                if(user.taskProgress.length === 0) {
+                    taskListHtml += '<li>Belum ada tugas yang disentuh.</li>';
+                } else {
+                    user.taskProgress.forEach(tp => {
+                        const status = tp.isCompleted ? '✅ Selesai' : '⏳ Proses';
+                        const note = tp.catatan ? `<br><span class="text-gray-500 text-xs">Catatan: ${tp.catatan}</span>` : '';
+                        taskListHtml += `<li class="border-b pb-1">
+                            <b>${tp.tugas.matakuliah} - ${tp.tugas.Namatugas}</b> <br>
+                            Status: ${status} ${note}
+                        </li>`;
+                    });
+                }
+                taskListHtml += '</ul>';
+
+                Swal.fire({
+                    title: `Detail Mahasiswa ${npm}`,
+                    html: taskListHtml,
+                    width: '600px'
+                });
+
+            } catch (e) {
+                Swal.fire('Error', 'Gagal ambil detail', 'error');
+            }
+        }
+
+        async function toggleEditor(npm, newStatus) {
+            try {
+                const res = await fetch('/api/admin/users/toggle-editor', {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ npm, isEditor: newStatus })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    const msg = newStatus ? 'User kini menjadi EDITOR.' : 'Akses Editor dicabut.';
+                    Swal.fire({ icon: 'success', title: 'Berhasil', text: msg, timer: 1500, showConfirmButton: false });
+                    loadUsers(); 
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (e) {
+                Swal.fire('Error', e.message, 'error');
+            }
+        }
+
+        loadUsers();
+    </script>
+</body>
+</html>

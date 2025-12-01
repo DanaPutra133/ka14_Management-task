@@ -19,7 +19,7 @@
             --text-color: #333333;
             --table-border-color: #dee2e6;
 
-            --bg-color: #ffffff; /* Redefine for clarity, though it's similar to --background-color */
+            --bg-color: #ffffff;
             --table-bg: #ffffff;
             --table-border: #dddddd;
             --hover-bg: #f1f1f1;
@@ -32,7 +32,7 @@
             --text-color: #ffffff;
             --table-border-color: #343a40;
 
-            --bg-color: #121212; /* Redefine for clarity */
+            --bg-color: #121212; 
             --table-bg: #1e1e1e;
             --table-border: #333333;
             --hover-bg: #2a2a2a;
@@ -42,33 +42,30 @@
             font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
-            /* Gunakan var(--bg-color) atau var(--background-color) untuk body */
             background-color: var(--bg-color);
             color: var(--text-color);
             transition: all 0.3s ease;
-            overflow-x: hidden; /* Mencegah scroll horizontal yang tidak diinginkan */
+            overflow-x: hidden; 
         }
 
-        /* --- Gaya untuk background container dan image --- */
         .background-container {
-            position: fixed; /* Gunakan fixed agar background tetap saat scroll */
+            position: fixed; 
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             overflow: hidden;
-            z-index: -1; /* Pastikan di belakang semua konten */
+            z-index: -1; 
         }
 
         .background-image {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Menjaga rasio 16:9 dan mengisi area */
-            filter: blur(6px); /* Efek blur */
-            transform: scale(1.05); /* Memperbesar sedikit untuk menyembunyikan tepi blur */
-            opacity: 0.6; /* Transparansi */
+            object-fit: cover; 
+            filter: blur(6px);
+            transform: scale(1.05); 
+            opacity: 0.6; 
         }
-        /* --- Akhir gaya background --- */
 
         .header {
             background-color: var(--primary-color);
@@ -117,10 +114,10 @@
 
         .container {
             max-width: 1200px;
-            margin: 80px auto 20px; /* Sesuaikan margin-top jika fixed header Anda lebih tinggi */
+            margin: 80px auto 20px; 
             padding: 20px;
-            position: relative; /* Penting agar konten di atas background */
-            z-index: 1; /* Pastikan di atas background */
+            position: relative; 
+            z-index: 1; 
         }
 
         .description {
@@ -140,17 +137,17 @@
             width: 100%;
             border-collapse: collapse;
             margin: 1rem 0;
-            background-color: var(--table-bg); /* Menggunakan variabel theme */
+            background-color: var(--table-bg); 
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
             border-radius: 8px;
             overflow: hidden;
-            border: 1px solid var(--table-border); /* Tambahkan border untuk tema gelap */
+            border: 1px solid var(--table-border); 
         }
 
         th, td {
             padding: 15px;
             text-align: left;
-            border-bottom: 1px solid var(--table-border); /* Gunakan variabel theme */
+            border-bottom: 1px solid var(--table-border);
         }
 
         th {
@@ -160,7 +157,7 @@
         }
 
         tr:hover {
-            background-color: var(--hover-bg); /* Menggunakan variabel theme */
+            background-color: var(--hover-bg); 
         }
 
         .btn-try {
@@ -279,12 +276,12 @@
 
         .slider .icon.sun {
             left: 8px;
-            color: #f1c40f; /* Yellow for the sun */
+            color: #f1c40f;
         }
 
         .slider .icon.moon {
             right: 8px;
-            color: #888; /* Gray for the moon */
+            color: #888; 
         }
 
         .contact-form-section {
@@ -327,7 +324,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #ffff; /* Bisa kamu ubah */
+            background-color: #ffff; 
             display: flex;
             justify-content: center;
             align-items: center;
@@ -343,7 +340,7 @@
             opacity: 0;
         }
 
-        .splash-logo img { /* Tambahkan ini untuk mengatur gambar di splash screen */
+        .splash-logo img {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
@@ -513,12 +510,12 @@
                 <tbody id="allData">
                     <tr>
                         <td>1</td>
-                        <td>Tugas Mahasiswa</td>
+                        <td>Mahasiswa</td>
                         <td>
-                            <button class="btn btn-try" onclick="tryApi('/tugas-mahasiswa')">Tambah Data</button>
+                            <button class="btn-try" onclick="checkLoginAndRedirect()">Login Tugas</button>
                         </td>
                         <td>
-                            <button class="btn btn-try" onclick="tryApi('/table-mhs')">Cek Table</button>
+                            <button class="btn btn-try" onclick="tryApi('/table-mhs')">Table Tugas</button>
                         </td>
                         <td>
                             <button class="btn btn-try" onclick="tryApi('/tugas/mahasiswa')">GET</button>
@@ -545,6 +542,14 @@
                         </td>
                         </td>
                     </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Admin</td>
+                        <td>
+                            <button class="btn btn-try" onclick="tryApi('/admin')">Login</button>
+                        </td>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -564,6 +569,27 @@
     </footer>
 
     <script>
+        async function checkLoginAndRedirect() {
+        try {
+            const response = await fetch('/api/check-session');
+            const data = await response.json();
+
+            if (data.loggedIn) {
+
+                if (data.user.role === 'mahasiswa' || data.user.isEditor) {
+                    window.location.href = '/dashboard-user';
+                } else {
+                    window.location.href = '/admin'; 
+                }
+            } else {
+                window.location.href = '/login-mahasiswa';
+            }
+        } catch (error) {
+            console.error('Gagal cek sesi:', error);
+            window.location.href = '/login-mahasiswa';
+        }
+    }
+
         // animasi intro
         window.addEventListener('load', () => {
             setTimeout(() => {
@@ -599,7 +625,7 @@
                     form.reset(); 
 
                     setTimeout(() => {
-                        location.reload(); // refresh halaman setelah 2 detik
+                        location.reload(); 
                     }, 2000);
                 } else {
                     throw new Error('Gagal mengirim pesan');

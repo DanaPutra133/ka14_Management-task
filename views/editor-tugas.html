@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor Tugas - Mahasiswa</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Poppins', sans-serif; transition: background-color 0.3s ease, color 0.3s ease; }
+        label.cb-container {
+            font-family: "Montserrat", sans-serif;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: block;
+            position: relative;
+        }
+        label.cb-container > input { display: none; }
+        label.cb-container span { color: #6A759B; margin-left: 10px; font-size: 1rem; }
+        label.cb-container i {
+            display: inline-block; width: 44px; height: 20px; border-radius: 20px;
+            vertical-align: middle; transition: .25s .09s; position: relative; background: #deeff7;
+        }
+        label.cb-container i::after {
+            content: ""; display: block; width: 20px; height: 20px; top: 0.1px; left: 1px;
+            border-radius: 50%; background: #fff; position: absolute; box-shadow: 1px 2px 4px rgba(0,0,0,.4);
+            transition: .15s;
+        }
+        label.cb-container > input:checked + i { background: #1094fb; }
+        label.cb-container > input:checked + i + span { color: #29316b; }
+        label.cb-container > input:checked + i::after { transform: translateX(25px); }
+
+        :root {
+            --bg-default: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-default: #111827;
+            --muted-text: #4b5563;
+            --table-bg: #ffffff;
+            --table-border: #e5e7eb;
+            --hover-row: #f3f4f6;
+            --input-bg: #ffffff;
+            --input-border: #d1d5db;
+            --btn-primary: #2563eb;
+            --thead-bg: rgba(229,231,235,0.9);
+        }
+        
+        /* Dark Mode Theme */
+        body.dark-theme {
+            --bg-default: #071022;
+            --card-bg: #0b1220;
+            --text-default: #e6eef8;
+            --muted-text: #9aa9bf;
+            --table-bg: #071022;
+            --table-border: #1f2937;
+            --hover-row: rgba(255,255,255,0.03);
+            --input-bg: rgba(255,255,255,0.02);
+            --input-border: #24303b;
+            --btn-primary: #1e40af;
+            --thead-bg: rgba(255,255,255,0.03);
+        }
+        
+        body { background-color: var(--bg-default); color: var(--text-default); }
+        .card-bg-override { background-color: var(--card-bg) !important; color: var(--text-default); }
+
+        .dark-theme .bg-white { background-color: var(--card-bg) !important; }
+        .dark-theme .text-gray-700 { color: var(--muted-text) !important; }
+
+        table { background-color: var(--table-bg); border-color: var(--table-border); border-radius: 8px; overflow: hidden; }
+        th, td { border-bottom: 1px solid var(--table-border); color: var(--text-default); }
+        th { background-color: var(--thead-bg); color: var(--text-default); font-weight: 600; }
+        tr:hover { background-color: var(--hover-row); }
+
+        input[type="text"], input[type="date"] {
+            background-color: var(--input-bg); color: var(--text-default);
+            border: 1px solid var(--input-border); padding: .5rem .6rem;
+            border-radius: .375rem; width: 100%; transition: border-color .15s;
+        }
+        input:focus { outline: none; border-color: var(--btn-primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
+
+        @media (min-width: 640px) {
+            fieldset { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-top: 20px; }
+        }
+
+        .floating-theme-toggle { position: fixed; top: 1rem; right: 1rem; z-index: 1000; }
+        .dark-theme label.cb-container > input:checked + i + span { color: #a5b4fc; } 
+    </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8">
+
+    <div class="floating-theme-toggle">
+        <button onclick="toggleDarkMode()" class="p-2 rounded-full bg-white border border-gray-200 shadow-md text-yellow-500 hover:scale-110 transition-transform dark-btn-override">
+            <i id="themeIcon" class="ph ph-sun text-xl"></i>
+        </button>
+    </div>
+
+    <div class="max-w-7xl mx-auto bg-white rounded-lg shadow-md card-bg-override p-6 min-h-screen">
+        
+        <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4 border-b border-gray-200 pb-4" style="border-color: var(--table-border);">
+            <div>
+                <h1 class="text-2xl font-bold flex items-center gap-2">
+                    <i class="ph ph-pencil-simple-line text-blue-600"></i> Editor Tugas
+                </h1>
+                <p class="text-sm text-gray-500" style="color: var(--muted-text);">Menambah & Mengelola Tugas Kelas</p>
+            </div>
+            <a href="/dashboard.html" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition flex items-center gap-2 text-sm">
+                <i class="ph ph-arrow-left"></i> Kembali ke Dashboard
+            </a>
+        </div>
+
+        <form id="tugasForm" class="space-y-4 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Mata Kuliah</label>
+                    <input type="text" id="matakuliah" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Deadline</label>
+                    <input type="date" id="deadline" required>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Nama Tugas</label>
+                    <input type="text" id="Namatugas" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-1">Url Gambar (Upload/Manual)</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="UrlGambar" class="flex-1" placeholder="https://...">
+                        
+                        <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="handleFileUpload(this)">
+                        
+                        <button type="button" onclick="document.getElementById('fileInput').click()" 
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-3 rounded-md transition flex items-center justify-center shadow-sm" 
+                            title="Upload Gambar">
+                            <i class="ph ph-cloud-arrow-up text-xl"></i>
+                        </button>
+                    </div>
+                    <p id="uploadStatus" class="text-xs text-gray-500 mt-1 hidden" style="color: var(--muted-text);">Mengupload...</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Noted (Opsional)</label>
+                    <input type="text" id="Noted">
+                </div>
+            </div>
+
+            <fieldset>
+                <label class="cb-container">
+                    <input class="cb" id="kelompok" type="checkbox" name="kelompok" />
+                    <i></i> <span>Kelompok</span>
+                </label>
+                <label class="cb-container">
+                    <input class="cb" id="vclass" type="checkbox" name="vclass" />
+                    <i></i> <span>VClass</span>
+                </label>
+                <label class="cb-container">
+                    <input class="cb" id="praktikum" type="checkbox" name="praktikum" />
+                    <i></i> <span>Praktikum</span>
+                </label>
+                <label class="cb-container">
+                    <input class="cb" id="ilab" type="checkbox" name="ilab" />
+                    <i></i> <span>iLab</span>
+                </label>
+                <label class="cb-container">
+                    <input class="cb" id="Mandiri" type="checkbox" name="Mandiri" />
+                    <i></i> <span>Mandiri</span>
+                </label>
+            </fieldset>
+            
+            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 font-medium shadow-md transition mt-6">
+                Simpan Tugas
+            </button>
+        </form>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="text-xs uppercase">
+                    <tr>
+                        <th class="px-4 py-3">Mata Kuliah</th>
+                        <th class="px-4 py-3">Nama Tugas</th>
+                        <th class="px-4 py-3">Noted</th>
+                        <th class="px-4 py-3">URL</th>
+                        <th class="py-2 px-4 text-left">Deadline<br>YYYY-MM-DD</th>
+                        <th class="py-2 px-4 text-left">Kelompok</th>
+                        <th class="py-2 px-4 text-left">Vclass</th>
+                        <th class="py-2 px-4 text-left">Praktikum</th>
+                        <th class="py-2 px-4 text-left">iLab</th>
+                        <th class="py-2 px-4 text-left">Mandiri</th>
+                        <th class="px-4 py-3 text-center">Editor</th>
+                        <th class="px-4 py-3 text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tugasList">
+                    <tr><td colspan="11" class="text-center py-4">Memuat data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const themeIcon = document.getElementById('themeIcon');
+        const darkBtn = document.querySelector('.floating-theme-toggle button');
+
+        function updateThemeUI(isDark) {
+            if (isDark) {
+                document.body.classList.add('dark-theme');
+                themeIcon.classList.replace('ph-sun', 'ph-moon');
+                darkBtn.style.backgroundColor = '#1f2937';
+                darkBtn.style.borderColor = '#374151';
+            } else {
+                document.body.classList.remove('dark-theme');
+                themeIcon.classList.replace('ph-moon', 'ph-sun');
+                darkBtn.style.backgroundColor = '#ffffff';
+                darkBtn.style.borderColor = '#e5e7eb';
+            }
+        }
+
+        if (localStorage.getItem('darkMode') === 'true') updateThemeUI(true);
+
+        function toggleDarkMode() {
+            const isDark = document.body.classList.toggle('dark-theme');
+            localStorage.setItem('darkMode', isDark);
+            updateThemeUI(isDark);
+        }
+
+        const form = document.getElementById('tugasForm');
+        let isEditing = false;
+        let editingIndex = null;
+
+        async function loadTugas() {
+            const res = await fetch('/tugas/mahasiswa'); 
+            const data = await res.json();
+            
+            const tbody = document.getElementById('tugasList');
+            tbody.innerHTML = '';
+
+            data.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+
+            if(data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="11" class="text-center py-6">Belum ada tugas.</td></tr>';
+                return;
+            }
+
+            data.forEach((t, index) => {
+                const check = '✅';
+                const cross = '❌';
+
+                const tr = document.createElement('tr');
+                tr.className = 'border-b transition-colors';
+                tr.innerHTML = `
+                    <td class="px-4 py-3 font-medium">${t.matakuliah}</td>
+                    <td class="px-4 py-3">${t.Namatugas}</td>
+                    <td class="px-4 py-3">${t.Noted || '-'}</td>
+                    <td class="px-4 py-3 text-xs text-blue-500">${t.UrlGambar ? '<a href="'+t.UrlGambar+'" target="_blank">Link</a>' : '-'}</td>
+                    <td class="px-4 py-3">${new Date(t.deadline).toLocaleDateString('id-ID')}</td>
+                    
+                    <td class="px-2 py-3 text-center">${t.kelompok ? check : cross}</td>
+                    <td class="px-2 py-3 text-center">${t.vclass ? check : cross}</td>
+                    <td class="px-2 py-3 text-center">${t.praktikum ? check : cross}</td>
+                    <td class="px-2 py-3 text-center">${t.ilab ? check : cross}</td>
+                    <td class="px-2 py-3 text-center">${t.Mandiri ? check : cross}</td>
+                    
+                    <td class="px-4 py-3 text-center text-xs text-gray-400">
+                        ${t.updatedBy || t.createdBy || '-'}
+                    </td>
+                    
+                    <td class="px-4 py-3 text-center space-x-1">
+                        <button onclick="editTugas(${index})" class="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700 transition">Edit</button>
+                        <button onclick="deleteTugas(${index})" class="bg-red-600 text-white px-3 py-1 rounded text-xs hover:bg-red-700 transition">Hapus</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function handleFileUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const status = document.getElementById('uploadStatus');
+            const urlInput = document.getElementById('UrlGambar');
+            
+            status.textContent = "Mengupload...";
+            status.classList.remove('hidden', 'text-red-500', 'text-green-500');
+            status.classList.add('text-blue-500');
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                // Fetch tanpa Header Auth (karena pakai Session Cookie)
+                const res = await fetch('/upload-proxy', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await res.json();
+
+                if (data.url) {
+                    urlInput.value = data.url;
+                    status.textContent = "Upload Berhasil!";
+                    status.classList.replace('text-blue-500', 'text-green-500');
+                } else {
+                    throw new Error(data.error || 'Gagal upload');
+                }
+            } catch (err) {
+                console.error(err);
+                status.textContent = "Gagal: " + err.message;
+                status.classList.replace('text-blue-500', 'text-red-500');
+            }
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const checkIds = ['kelompok', 'vclass', 'praktikum', 'ilab', 'Mandiri'];
+            if (!checkIds.some(id => document.getElementById(id).checked)) {
+                return Swal.fire('Error', 'Pilih minimal satu kategori!', 'warning');
+            }
+
+            const payload = {
+                matakuliah: document.getElementById('matakuliah').value,
+                deadline: document.getElementById('deadline').value,
+                Namatugas: document.getElementById('Namatugas').value,
+                UrlGambar: document.getElementById('UrlGambar').value,
+                Noted: document.getElementById('Noted').value,
+                kelompok: document.getElementById('kelompok').checked,
+                vclass: document.getElementById('vclass').checked,
+                praktikum: document.getElementById('praktikum').checked,
+                ilab: document.getElementById('ilab').checked,
+                Mandiri: document.getElementById('Mandiri').checked
+            };
+
+            const url = isEditing ? `/tugas/mahasiswa/${editingIndex}` : '/tugas/mahasiswa';
+            const method = isEditing ? 'PUT' : 'POST';
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (res.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: isEditing ? 'Tugas Diupdate' : 'Tugas Dibuat',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                    form.reset();
+                    isEditing = false;
+                    loadTugas();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    throw new Error('Gagal request');
+                }
+            } catch (err) {
+                Swal.fire('Error', 'Terjadi kesalahan', 'error');
+            }
+        });
+
+        async function editTugas(index) {
+            const res = await fetch('/tugas/mahasiswa');
+            const data = await res.json();
+            const t = data[index];
+            
+            document.getElementById('matakuliah').value = t.matakuliah;
+            document.getElementById('deadline').value = t.deadline.split('T')[0];
+            document.getElementById('Namatugas').value = t.Namatugas;
+            document.getElementById('UrlGambar').value = t.UrlGambar || '';
+            document.getElementById('Noted').value = t.Noted || '';
+            document.getElementById('kelompok').checked = t.kelompok;
+            document.getElementById('vclass').checked = t.vclass;
+            document.getElementById('praktikum').checked = t.praktikum;
+            document.getElementById('ilab').checked = t.ilab;
+            document.getElementById('Mandiri').checked = t.Mandiri;
+
+            isEditing = true;
+            editingIndex = index;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            Swal.fire({
+                icon: 'info',
+                title: 'Mode Edit',
+                text: 'Silakan ubah data pada form di atas',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+
+        async function deleteTugas(index) {
+            const result = await Swal.fire({
+                title: 'Hapus Tugas?',
+                text: "Data tidak bisa dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Ya, Hapus!'
+            });
+
+            if (result.isConfirmed) {
+                await fetch(`/tugas/mahasiswa/${index}`, { method: 'DELETE' });
+                loadTugas();
+                Swal.fire('Terhapus!', 'Tugas berhasil dihapus.', 'success');
+            }
+        }
+
+        loadTugas();
+    </script>
+</body>
+</html>
