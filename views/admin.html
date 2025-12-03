@@ -284,6 +284,7 @@
                             <th class="py-2 px-4 text-left">Praktikum</th>
                             <th class="py-2 px-4 text-left">iLab</th>
                             <th class="py-2 px-4 text-left">Mandiri</th>
+                             <th class="px-4 py-3 text-center">Editor</th>
                             <th class="py-2 px-4 text-left">Aksi</th>
                         </tr>
                     </thead>
@@ -498,6 +499,11 @@
                         <td class="py-3 px-6">${t.praktikum ? '✅' : '❌'}</td>
                         <td class="py-3 px-6">${t.ilab ? '✅' : '❌'}</td>
                         <td class="py-3 px-6">${t.Mandiri ? '✅' : '❌'}</td>
+
+                        <td class="px-4 py-3 text-center text-xs text-gray-400">
+                        ${t.updatedBy || t.createdBy || '-'}
+                    </td>
+                    
                         <td class="py-3 px-6 flex items-center space-x-2">
                             <button onclick="editTugas(${index})" class="bg-blue-600 text-white py-1 px-3 rounded hover:bg-blue-700 text-xs">Edit</button>
                             <button onclick="deleteTugas(${index})" class="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-700 text-xs">Hapus</button>

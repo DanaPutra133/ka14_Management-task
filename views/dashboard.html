@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Tugas Mahasiswa</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -14,13 +15,12 @@
                         dark: { bg: '#0f172a', card: '#1e293b', text: '#e2e8f0' },
                         primary: { DEFAULT: '#2563eb', hover: '#1d4ed8' }
                     },
-                    animation: {
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                    }
+                    animation: { 'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite' }
                 }
             }
         }
     </script>
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -31,23 +31,12 @@
         .task-card { transition: all 0.3s ease; }
         .task-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1); }
         
-        .custom-checkbox {
-            appearance: none; background-color: transparent; margin: 0; font: inherit; color: currentColor;
-            width: 1.4em; height: 1.4em; border: 2px solid currentColor; border-radius: 0.35em;
-            display: grid; place-content: center; cursor: pointer; transition: 0.2s;
-        }
-        .custom-checkbox::before {
-            content: ""; width: 0.8em; height: 0.8em; transform: scale(0);
-            transition: 120ms transform ease-in-out; box-shadow: inset 1em 1em white;
-            transform-origin: center; clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
-        }
+        .custom-checkbox { appearance: none; background-color: transparent; margin: 0; font: inherit; color: currentColor; width: 1.4em; height: 1.4em; border: 2px solid currentColor; border-radius: 0.35em; display: grid; place-content: center; cursor: pointer; transition: 0.2s; }
+        .custom-checkbox::before { content: ""; width: 0.8em; height: 0.8em; transform: scale(0); transition: 120ms transform ease-in-out; box-shadow: inset 1em 1em white; transform-origin: center; clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%); }
         .custom-checkbox:checked { background-color: #10B981; border-color: #10B981; }
         .custom-checkbox:checked::before { transform: scale(1); }
 
-        .loader {
-            border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%;
-            width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto;
-        }
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         #progressBar { transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -59,6 +48,12 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         .dark .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; }
+        .category-btn.active { background-color: #2563eb; color: white; border-color: #2563eb; }
+        .dark .category-btn.active { background-color: #3b82f6; border-color: #3b82f6; }
+
+        .status-btn.active[data-status="all"] { background-color: #4b5563; color: white; border-color: #4b5563; }
+        .status-btn.active[data-status="completed"] { background-color: #10B981; color: white; border-color: #10B981; }
+        .status-btn.active[data-status="pending"] { background-color: #EF4444; color: white; border-color: #EF4444; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 dark:bg-dark-bg dark:text-dark-text min-h-screen p-4 sm:p-6 lg:p-8">
@@ -72,11 +67,23 @@
             </div>
 
             <div class="flex items-center gap-2 bg-white dark:bg-dark-card p-1.5 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                <button onclick="setLayout('list')" id="btnList" class="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition" title="List"><i class="ph ph-list-dashes text-xl"></i></button>
-                <button onclick="setLayout('grid')" id="btnGrid" class="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition" title="Grid"><i class="ph ph-squares-four text-xl"></i></button>
+                <span id="editorBtnPlace"></span>
+
+                <button onclick="openClassModal()" class="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition text-blue-600 dark:text-blue-400" title="Progress Kelas">
+                    <i class="ph ph-users-three text-xl"></i>
+                </button>
+
                 <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+
+                <button onclick="setLayout('list')" id="btnList" class="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition" title="List View"><i class="ph ph-list-dashes text-xl"></i></button>
+                <button onclick="setLayout('grid')" id="btnGrid" class="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition" title="Grid View"><i class="ph ph-squares-four text-xl"></i></button>
+                
+                <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                
                 <button onclick="toggleDarkMode()" class="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition text-yellow-500"><i id="themeIcon" class="ph ph-sun text-xl"></i></button>
+                
                 <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                
                 <button onclick="logout()" class="flex items-center gap-2 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 rounded text-sm font-medium transition"><i class="ph ph-sign-out"></i> Keluar</button>
             </div>
         </header>
@@ -84,16 +91,23 @@
         <div class="bg-white dark:bg-dark-card rounded-xl border border-gray-200 dark:border-gray-700 p-5 mb-6 shadow-sm">
             <div class="flex justify-between items-center mb-2">
                 <div>
-                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-300 block">Progres Keseluruhan</span>
+                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-300 block">Progres Saya</span>
                     <span class="text-xs text-gray-500 dark:text-gray-400" id="progressText">Menghitung data...</span>
                 </div>
                 <span class="text-2xl font-bold text-primary dark:text-blue-400" id="progressPercent">0%</span>
             </div>
-            
             <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
                 <div id="progressBar" class="bg-blue-600 dark:bg-blue-500 h-full rounded-full" style="width: 0%"></div>
             </div>
         </div>
+
+        <div class="mb-6 space-y-3">
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider mr-1">Status:</span>
+                <button onclick="setStatusFilter('all')" class="status-btn active px-3 py-1 rounded-full border border-gray-200 dark:border-gray-700 text-xs font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition" data-status="all">Semua</button>
+                <button onclick="setStatusFilter('completed')" class="status-btn px-3 py-1 rounded-full border border-green-200 dark:border-green-800 text-xs font-medium bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 hover:bg-green-100 transition" data-status="completed">Selesai</button>
+                <button onclick="setStatusFilter('pending')" class="status-btn px-3 py-1 rounded-full border border-red-200 dark:border-red-800 text-xs font-medium bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 hover:bg-red-100 transition" data-status="pending">Belum</button>
+            </div>
 
         <div class="flex flex-wrap gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
             <button onclick="setFilter('all')" class="filter-btn active px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="all">Semua</button>
@@ -103,7 +117,7 @@
             <button onclick="setFilter('ilab')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="ilab">iLab</button>
             <button onclick="setFilter('mandiri')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="mandiri">Mandiri</button>
         </div>
-
+        </div>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             <div class="bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700 p-4 rounded-xl flex items-center justify-between shadow-sm">
                 <div><p class="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wide">Total Tugas</p><h2 class="text-2xl font-bold text-gray-800 dark:text-white mt-1" id="totalCount">0</h2></div>
@@ -123,20 +137,45 @@
         <div id="taskContainer" class="grid gap-4 transition-all duration-300"></div>
 
     </div>
+
     <div id="universalModal" class="fixed inset-0 z-[999] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 transition-opacity duration-300" onclick="closeModal()">
         <div class="relative bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[85vh] flex flex-col overflow-hidden transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
-            
             <div class="flex justify-between items-center mb-4 border-b border-gray-200 dark:border-gray-700 pb-3">
-                <h3 id="modalTitle" class="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                    </h3>
-                <button onclick="closeModal()" class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition">
-                    <i class="ph ph-x text-lg"></i>
-                </button>
+                <h3 id="modalTitle" class="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2"></h3>
+                <button onclick="closeModal()" class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition"><i class="ph ph-x text-lg"></i></button>
             </div>
-
             <div class="overflow-y-auto pr-2 custom-scrollbar">
                 <img id="modalImage" src="" alt="Preview" class="hidden w-full h-auto object-contain rounded-lg shadow-sm">
                 <div id="modalText" class="hidden text-gray-700 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-wrap bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg border border-gray-100 dark:border-gray-700"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="classModal" class="fixed inset-0 z-[999] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 transition-opacity duration-300" onclick="closeClassModal()">
+        <div class="relative bg-white dark:bg-gray-800 p-0 rounded-xl shadow-2xl max-w-3xl w-full mx-4 max-h-[85vh] flex flex-col overflow-hidden transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
+            
+            <div class="p-5 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                    <i class="ph ph-chart-bar-horizontal text-blue-500"></i> Progres Pengerjaan Kelas
+                </h3>
+                <button onclick="closeClassModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition">
+                    <i class="ph ph-x text-xl"></i>
+                </button>
+            </div>
+
+            <div class="overflow-y-auto custom-scrollbar p-5">
+                <table class="w-full text-sm text-left border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                    <thead class="bg-gray-100 dark:bg-gray-900 uppercase text-xs text-gray-600 dark:text-gray-300 font-semibold">
+                        <tr>
+                            <th class="px-6 py-4">Mahasiswa</th>
+                            <th class="px-6 py-4">Progress Tugas</th>
+                            <th class="px-6 py-4 text-right">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="classProgressBody" class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
+                        <tr><td colspan="3" class="text-center py-6 text-gray-500">Memuat data...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -145,7 +184,29 @@
         let currentLayout = localStorage.getItem('layout') || 'list';
         let isDarkMode = localStorage.getItem('theme') === 'dark';
         let activeFilter = 'all';
+        let activeCategory = 'all'; 
+        let activeStatus = 'all';
         let globalTasks = [];
+
+        function setCategoryFilter(category) {
+            activeCategory = category;
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                if(btn.dataset.category === category) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+
+            renderTasks();
+        }
+
+        function setStatusFilter(status) {
+            activeStatus = status;
+            document.querySelectorAll('.status-btn').forEach(btn => {
+                if(btn.dataset.status === status) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+
+            renderTasks();
+        }
 
         function initTheme() {
             const html = document.documentElement;
@@ -175,10 +236,8 @@
             const btnGrid = document.getElementById('btnGrid');
             const container = document.getElementById('taskContainer');
             const activeClass = ['bg-blue-100', 'text-blue-600', 'dark:bg-blue-900', 'dark:text-blue-300'];
-            
             btnList.classList.remove(...activeClass);
             btnGrid.classList.remove(...activeClass);
-
             if (currentLayout === 'list') {
                 btnList.classList.add(...activeClass);
                 container.className = 'flex flex-col gap-4';
@@ -200,14 +259,11 @@
         async function loadDashboard() {
             const loader = document.getElementById('loading');
             loader.classList.remove('hidden');
-
             try {
                 const res = await fetch('/api/student/dashboard');
-                if (res.status === 401) { window.location.href = '/login.html'; return; }
+                if (res.status === 401) { window.location.href = '/login-mahasiswa'; return; }
                 const tasks = await res.json();
-                
                 globalTasks = tasks.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
-                
                 loader.classList.add('hidden');
                 checkIfEditor(); 
                 renderTasks(); 
@@ -222,39 +278,48 @@
             try {
                 const res = await fetch('/api/check-session');
                 const data = await res.json();
-                const header = document.querySelector('header .flex.items-center');
-
+                const container = document.getElementById('editorBtnPlace');
                 if (data.user && data.user.isEditor) {
                     if(!document.getElementById('btnEditor')) {
                         const btn = document.createElement('a');
                         btn.id = 'btnEditor';
                         btn.href = '/editor-tugas.html';
-                        btn.className = 'p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition text-purple-600 dark:text-purple-400';
+                        btn.className = 'p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition text-purple-600 dark:text-purple-400 mr-2';
                         btn.title = "Mode Editor";
                         btn.innerHTML = '<i class="ph ph-pencil-simple-line text-xl"></i>';
-                        header.insertBefore(btn, header.children[0]);
+                        container.appendChild(btn);
                     }
                 }
             } catch (e) { console.error(e); }
         }
 
-        // RENDER LOGIC
         function renderTasks() {
             const container = document.getElementById('taskContainer');
             container.innerHTML = '';
 
+            // FILTERING GANDA (Kategori DAN Status)
             const filteredTasks = globalTasks.filter(t => {
-                if (activeFilter === 'all') return true;
-                if (activeFilter === 'kelompok') return t.kelompok;
-                if (activeFilter === 'vclass') return t.vclass;
-                if (activeFilter === 'praktikum') return t.praktikum;
-                if (activeFilter === 'ilab') return t.ilab;
-                if (activeFilter === 'mandiri') return t.Mandiri;
-                return true;
+                // 1. Cek Kategori
+                let categoryMatch = false;
+                if (activeCategory === 'all') categoryMatch = true;
+                else if (activeCategory === 'kelompok' && t.kelompok) categoryMatch = true;
+                else if (activeCategory === 'vclass' && t.vclass) categoryMatch = true;
+                else if (activeCategory === 'praktikum' && t.praktikum) categoryMatch = true;
+                else if (activeCategory === 'ilab' && t.ilab) categoryMatch = true;
+                else if (activeCategory === 'mandiri' && t.Mandiri) categoryMatch = true;
+
+                // 2. Cek Status
+                let statusMatch = false;
+                if (activeStatus === 'all') statusMatch = true;
+                else if (activeStatus === 'completed' && t.isCompleted) statusMatch = true;
+                else if (activeStatus === 'pending' && !t.isCompleted) statusMatch = true;
+                return categoryMatch && statusMatch;
             });
 
             if (filteredTasks.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-20 text-gray-400"><p>Tidak ada tugas di kategori ini.</p></div>`;
+                container.innerHTML = `<div class="col-span-full text-center py-20 text-gray-400">
+                    <p>Tidak ada tugas dengan filter ini.</p>
+                </div>`;
                 return;
             }
 
@@ -289,62 +354,17 @@
                 const statusClass = t.isCompleted ? 'border-l-4 border-green-500 opacity-90' : 'border-l-4 border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500';
                 const textColor = t.isCompleted ? 'text-gray-400 line-through dark:text-gray-500' : 'text-gray-800 dark:text-gray-100';
 
-                const imgBtn = t.UrlGambar ? 
-                    `<button onclick="openModal('image', '${t.UrlGambar}')" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1.5 text-xs font-semibold bg-blue-50 dark:bg-blue-900/20 px-2.5 py-1.5 rounded-lg transition border border-blue-100 dark:border-blue-800/50">
-                        <i class="ph ph-image text-lg"></i> Soal
-                    </button>` : '';
-
+                const imgBtn = t.UrlGambar ? `<button onclick="openModal('image', '${t.UrlGambar}')" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1.5 text-xs font-semibold bg-blue-50 dark:bg-blue-900/20 px-2.5 py-1.5 rounded-lg transition border border-blue-100 dark:border-blue-800/50"><i class="ph ph-image text-lg"></i> Gambar</button>` : '';
                 const safeNote = t.Noted ? t.Noted.replace(/'/g, "\\'").replace(/"/g, '&quot;') : '';
-                const noteBtn = t.Noted ? 
-                    `<button onclick="openModal('text', '${safeNote}')" class="text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 flex items-center gap-1.5 text-xs font-semibold bg-purple-50 dark:bg-purple-900/20 px-2.5 py-1.5 rounded-lg transition border border-purple-100 dark:border-purple-800/50">
-                        <i class="ph ph-info text-lg"></i> Catatan
-                    </button>` : '';
-
+                const hasNote = t.Noted && t.Noted.trim() !== '-' && t.Noted.trim() !== '';
+                const noteBtn = hasNote ? `<button onclick="openModal('text', '${safeNote}')" class="text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 flex items-center gap-1.5 text-xs font-semibold bg-purple-50 dark:bg-purple-900/20 px-2.5 py-1.5 rounded-lg transition border border-purple-100 dark:border-purple-800/50"><i class="ph ph-info text-lg"></i> Info</button>` : '';
                 const actionButtons = `<div class="flex gap-2">${imgBtn}${noteBtn}</div>`;
 
                 let html = '';
                 if (currentLayout === 'list') {
-                    html = `
-                    <div class="task-card ${statusClass} relative p-4 rounded-xl bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                        <div class="flex-shrink-0 pt-1 sm:pt-0">
-                            <input type="checkbox" class="custom-checkbox text-green-500 border-gray-300 dark:border-gray-500" onchange="toggleTask(${t.id}, this.checked)" ${t.isCompleted ? 'checked' : ''}>
-                        </div>
-                        <div class="flex-grow w-full">
-                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-1">
-                                <h3 class="font-bold text-lg ${textColor}">${t.matakuliah}</h3>
-                                <div class="flex gap-2 items-center self-start sm:self-auto">
-                                    ${actionButtons} <span class="px-2.5 py-0.5 rounded text-xs font-medium ${badgeClass}">${badgeText}</span>
-                                </div>
-                            </div>
-                            <div class="flex flex-wrap gap-2 items-center mb-2">
-                                <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">${t.Namatugas}</span>
-                                <span class="text-xs text-gray-400">| ${deadlineDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
-                            </div>
-                            <div class="flex gap-2 mb-3">${tags}</div>
-                            <input type="text" value="${t.catatan || ''}" placeholder="Tulis catatan..." class="w-full bg-transparent border-b border-gray-200 dark:border-gray-700 text-sm py-1 text-gray-600 dark:text-gray-300 focus:outline-none focus:border-blue-500 transition-colors" onblur="saveNote(${t.id}, this.value)">
-                        </div>
-                    </div>`;
+                    html = `<div class="task-card ${statusClass} relative p-4 rounded-xl bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row gap-4 items-start sm:items-center"><div class="flex-shrink-0 pt-1 sm:pt-0"><input type="checkbox" class="custom-checkbox text-green-500 border-gray-300 dark:border-gray-500" onchange="toggleTask(${t.id}, this.checked)" ${t.isCompleted ? 'checked' : ''}></div><div class="flex-grow w-full"><div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-1"><h3 class="font-bold text-lg ${textColor}">${t.matakuliah}</h3><div class="flex gap-2 items-center self-start sm:self-auto">${actionButtons} <span class="px-2.5 py-0.5 rounded text-xs font-medium ${badgeClass}">${badgeText}</span></div></div><div class="flex flex-wrap gap-2 items-center mb-2"><span class="text-sm font-semibold text-gray-700 dark:text-gray-300">${t.Namatugas}</span><span class="text-xs text-gray-400">| ${deadlineDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}</span></div><div class="flex gap-2 mb-3">${tags}</div><input type="text" value="${t.catatan || ''}" placeholder="Tulis catatan..." class="w-full bg-transparent border-b border-gray-200 dark:border-gray-700 text-sm py-1 text-gray-600 dark:text-gray-300 focus:outline-none focus:border-blue-500 transition-colors" onblur="saveNote(${t.id}, this.value)"></div></div>`;
                 } else {
-                    html = `
-                    <div class="task-card ${statusClass} flex flex-col justify-between h-full p-5 rounded-xl bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700">
-                        <div class="flex justify-between items-start mb-3">
-                            <input type="checkbox" class="custom-checkbox text-green-500 border-gray-300 dark:border-gray-500" onchange="toggleTask(${t.id}, this.checked)" ${t.isCompleted ? 'checked' : ''}>
-                            <span class="px-2.5 py-0.5 rounded text-xs font-medium ${badgeClass}">${badgeText}</span>
-                        </div>
-                        <div class="mb-4">
-                            <div class="flex justify-between items-start mb-1">
-                                <h3 class="font-bold text-lg leading-tight ${textColor}">${t.matakuliah}</h3>
-                                ${actionButtons}
-                            </div>
-                            <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">${t.Namatugas}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-1"><i class="ph ph-calendar"></i> ${deadlineDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
-                            <div class="flex flex-wrap gap-2">${tags}</div>
-                        </div>
-                        <div class="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700 flex items-center gap-2 text-gray-400">
-                            <i class="ph ph-pencil-simple text-sm"></i>
-                            <input type="text" value="${t.catatan || ''}" placeholder="Catatan..." class="w-full bg-transparent text-xs focus:outline-none text-gray-600 dark:text-gray-300" onblur="saveNote(${t.id}, this.value)">
-                        </div>
-                    </div>`;
+                    html = `<div class="task-card ${statusClass} flex flex-col justify-between h-full p-5 rounded-xl bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700"><div class="flex justify-between items-start mb-3"><input type="checkbox" class="custom-checkbox text-green-500 border-gray-300 dark:border-gray-500" onchange="toggleTask(${t.id}, this.checked)" ${t.isCompleted ? 'checked' : ''}><span class="px-2.5 py-0.5 rounded text-xs font-medium ${badgeClass}">${badgeText}</span></div><div class="mb-4"><div class="flex justify-between items-start mb-1"><h3 class="font-bold text-lg leading-tight ${textColor}">${t.matakuliah}</h3>${actionButtons}</div><p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">${t.Namatugas}</p><p class="text-xs text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-1"><i class="ph ph-calendar"></i> ${deadlineDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</p><div class="flex flex-wrap gap-2">${tags}</div></div><div class="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700 flex items-center gap-2 text-gray-400"><i class="ph ph-pencil-simple text-sm"></i><input type="text" value="${t.catatan || ''}" placeholder="Catatan..." class="w-full bg-transparent text-xs focus:outline-none text-gray-600 dark:text-gray-300" onblur="saveNote(${t.id}, this.value)"></div></div>`;
                 }
                 container.insertAdjacentHTML('beforeend', html);
             });
@@ -354,23 +374,15 @@
             const tasks = globalTasks;
             const total = tasks.length;
             const done = tasks.filter(t => t.isCompleted).length;
-            
             document.getElementById('totalCount').innerText = total;
             document.getElementById('doneCount').innerText = done;
             document.getElementById('pendingCount').innerText = total - done;
-
             const percent = total === 0 ? 0 : Math.round((done / total) * 100);
             const bar = document.getElementById('progressBar');
             bar.style.width = `${percent}%`;
-            
-            if(percent === 100) {
-                bar.className = "bg-green-500 h-full rounded-full transition-all duration-700";
-            } else {
-                bar.className = "bg-blue-600 dark:bg-blue-500 h-full rounded-full transition-all duration-700";
-            }
-
+            if(percent === 100) { bar.className = "bg-green-500 h-full rounded-full transition-all duration-700"; } 
+            else { bar.className = "bg-blue-600 dark:bg-blue-500 h-full rounded-full transition-all duration-700"; }
             document.getElementById('progressPercent').innerText = `${percent}%`;
-            
             const textEl = document.getElementById('progressText');
             if (total === 0) textEl.innerText = "Tidak ada tugas aktif.";
             else if (percent === 0) textEl.innerText = "Ayo mulai cicil tugasmu!";
@@ -378,18 +390,146 @@
             else if (percent < 100) textEl.innerText = "Sedikit lagi selesai!";
             else textEl.innerText = "Kerja bagus! Semua tugas selesai.";
         }
+        async function openClassModal() {
+            const modal = document.getElementById('classModal');
+            const tbody = document.getElementById('classProgressBody');
+                        const thead = document.querySelector('#classModal thead tr');
+            if (thead.children.length === 3) { 
+                const th = document.createElement('th');
+                th.className = "px-4 py-3 text-center rounded-tr-lg";
+                th.innerText = "Detail";
+                thead.appendChild(th);
+            }
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.firstElementChild.classList.remove('scale-95');
+                modal.firstElementChild.classList.add('scale-100');
+                modal.classList.remove('opacity-0');
+            }, 10);
+
+            try {
+                const res = await fetch('/api/student/class-progress');
+                const data = await res.json();
+                tbody.innerHTML = '';
+                
+                data.forEach(u => {
+                    let color = 'bg-red-500';
+                    if(u.percent >= 50 && u.percent < 100) color = 'bg-yellow-500';
+                    if(u.percent === 100) color = 'bg-green-500';
+
+                    let statusBadge = '<span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs font-semibold">Proses</span>';
+                    if(u.percent === 100) statusBadge = '<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-semibold">Selesai</span>';
+
+                    const row = `
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors border-b dark:border-gray-700">
+                            <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">${u.npm}</td>
+                            <td class="px-6 py-4 w-1/2">
+                                <div class="flex justify-between mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+                                    <span>${u.completed} / ${u.total}</span>
+                                    <span>${u.percent}%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 overflow-hidden">
+                                    <div class="${color} h-2.5 rounded-full transition-all duration-500" style="width: ${u.percent}%"></div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                ${statusBadge}
+                            </td>
+                            <td class="px-4 py-4 text-center">
+                                <button onclick="viewStudentDetail('${u.npm}')" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition">
+                                    <i class="ph ph-eye text-xl"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.insertAdjacentHTML('beforeend', row);
+                });
+            } catch (e) {
+                console.error(e);
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-red-500">Gagal memuat data.</td></tr>';
+            }
+        }
+
+        async function viewStudentDetail(npm) {
+            try {
+                Swal.fire({ title: 'Memuat...', didOpen: () => Swal.showLoading() });
+
+                const res = await fetch(`/api/student/class-progress/${npm}`);
+                const data = await res.json();
+                
+                let listHtml = '<div class="text-left space-y-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">';
+                
+                if(data.tasks.length === 0) {
+                    listHtml += '<p class="text-center text-gray-500">Belum ada tugas.</p>';
+                } else {
+                    data.tasks.forEach(t => {
+                        let statusIcon, statusText, statusClass;
+                        
+                        if (t.isCompleted) {
+                            statusIcon = '<i class="ph ph-check-square text-lg"></i>';
+                            statusText = 'Selesai';
+                            statusClass = 'text-green-600 font-semibold';
+                        } else {
+                            statusIcon = '<i class="ph ph-hourglass text-lg"></i>';
+                            statusText = 'Proses';
+                            statusClass = 'text-gray-600 font-medium';
+                        }
+
+                        listHtml += `
+                            <div class="border-b border-gray-200 dark:border-gray-700 pb-3 last:border-0">
+                                <h4 class="font-bold text-gray-800 dark:text-gray-200 text-sm leading-snug">
+                                    ${t.matakuliah} - ${t.namatugas}
+                                </h4>
+                                <div class="flex items-center gap-2 mt-1 text-sm">
+                                    <span class="text-gray-500 dark:text-gray-400">Status:</span>
+                                    <span class="flex items-center gap-1 ${statusClass}">
+                                        ${statusIcon} ${statusText}
+                                    </span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                listHtml += '</div>';
+
+                Swal.fire({
+                    title: `Detail ${data.npm}`,
+                    html: listHtml,
+                    width: '500px',
+                    showCloseButton: false,
+                    showConfirmButton: true,
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#6366f1',
+                    customClass: {
+                        title: 'text-xl font-bold text-gray-800 dark:text-white mb-4',
+                        popup: 'rounded-xl dark:bg-gray-800 border dark:border-gray-700'
+                    }
+                });
+
+            } catch (e) {
+                console.error(e);
+                Swal.fire('Error', 'Gagal ambil detail', 'error');
+            }
+        }
+
+        function closeClassModal() {
+            const modal = document.getElementById('classModal');
+            modal.classList.add('opacity-0');
+            modal.firstElementChild.classList.remove('scale-100');
+            modal.firstElementChild.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
 
         function openModal(type, content) {
             const modal = document.getElementById('universalModal');
             const titleEl = document.getElementById('modalTitle');
             const imgEl = document.getElementById('modalImage');
             const textEl = document.getElementById('modalText');
-
             imgEl.classList.add('hidden');
             textEl.classList.add('hidden');
-
             if (type === 'image') {
-                titleEl.innerHTML = '<i class="ph ph-image text-blue-500"></i>Gambar';
+                titleEl.innerHTML = '<i class="ph ph-image text-blue-500"></i> Lihat Lampiran';
                 imgEl.src = content;
                 imgEl.classList.remove('hidden');
             } else {
@@ -397,7 +537,6 @@
                 textEl.innerText = content; 
                 textEl.classList.remove('hidden');
             }
-
             modal.classList.remove('hidden');
             setTimeout(() => {
                 modal.classList.remove('opacity-0');
@@ -421,10 +560,8 @@
             try {
                 const task = globalTasks.find(t => t.id === id);
                 if(task) task.isCompleted = status;
-                
                 renderTasks(); 
                 updateStats(); 
-
                 await fetch('/api/student/toggle-task', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ tugasId: id, isCompleted: status })
@@ -436,7 +573,6 @@
             try {
                 const task = globalTasks.find(t => t.id === id);
                 if(task) task.catatan = note;
-
                 await fetch('/api/student/save-note', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ tugasId: id, note: note })

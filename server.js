@@ -245,8 +245,12 @@ app.post("/api/admin/users/approve", verifyAdmin, async (req, res) => {
 
 const requireStudent = (req, res, next) => {
   if (!req.session.user || req.session.user.role !== "mahasiswa") {
-    return res.status(401).json({ error: "Unauthorized" });
+    if (req.originalUrl.startsWith("/api")) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    return res.redirect("/login-mahasiswa");
   }
+
   next();
 };
 
@@ -532,7 +536,70 @@ app.post("/api/student/save-note", requireStudent, async (req, res) => {
   }
 });
 
+app.get("/api/student/class-progress", requireStudent, async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      where: { isApproved: true }, 
+      include: { taskProgress: true },
+      orderBy: { npm: "asc" },
+    });
 
+    const totalTugas = await prisma.tugasMhs.count();
+    const data = users.map((u) => {
+      const completedCount = u.taskProgress.filter((t) => t.isCompleted).length;
+      const percent =
+        totalTugas > 0 ? Math.round((completedCount / totalTugas) * 100) : 0;
+
+      return {
+        npm: u.npm,
+        completed: completedCount,
+        total: totalTugas,
+        percent: percent,
+      };
+    });
+
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get(
+  "/api/student/class-progress/:npm",
+  requireStudent,
+  async (req, res) => {
+    try {
+      const { npm } = req.params;
+
+      // 1. Ambil User & Progressnya
+      const user = await prisma.user.findUnique({
+        where: { npm },
+        include: { taskProgress: true },
+      });
+
+      if (!user) return res.status(404).json({ error: "User not found" });
+
+      // 2. Ambil Semua Tugas
+      const allTasks = await prisma.tugasMhs.findMany({
+        orderBy: { deadline: "asc" },
+      });
+
+      // 3. Gabungkan Data (Mapping Status)
+      const taskDetails = allTasks.map((task) => {
+        const prog = user.taskProgress.find((p) => p.tugasId === task.id);
+        return {
+          matakuliah: task.matakuliah,
+          namatugas: task.Namatugas,
+          isCompleted: prog ? prog.isCompleted : false,
+        };
+      });
+
+      res.json({ npm: user.npm, tasks: taskDetails });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  }
+);
 
 
 
