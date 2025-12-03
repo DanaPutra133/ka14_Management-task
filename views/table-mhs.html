@@ -221,6 +221,7 @@ body.dark-theme .border-gray-200 {
                     <tr class="bg-gray-200 text-gray-600 uppercase text-xs sm:text-sm leading-normal">
                         <th class="py-2 px-4 sm:py-3 sm:px-6 text-left">Mata Kuliah</th>
                         <th class="py-2 px-4 sm:py-3 sm:px-6 text-left">Nama Tugas</th>
+                        <th class="py-2 px-4 sm:py-3 sm:px-6 text-left">Noted</th>
                         <th class="py-2 px-4 sm:py-3 sm:px-6 text-left">Deadline<br>YYYY-MM-DD</th>
                         <th class="py-2 px-4 sm:py-3 sm:px-6 text-left">Kelompok</th>
                         <th class="py-2 px-4 sm:py-3 sm:px-6 text-left">VClass</th>
@@ -230,11 +231,8 @@ body.dark-theme .border-gray-200 {
                     </tr>
                 </thead>
                 <tbody id="tugasList" class="text-gray-600 text-xs sm:text-sm font-light">
-                    <!-- Tugas akan ditampilkan di sini -->
                 </tbody>
             </table>
-
-            <!-- Div buat laporan kalau user mau nambah / chat dev -->
             <div class="mt-6 text-center">
                 <p class="text-sm text-gray-700 mb-2">Ada yang salah? atau ingin menambahkan? Bisa klik ini:</p>
                 <td>
@@ -314,6 +312,7 @@ body.dark-theme .border-gray-200 {
                     <tr class="border-b hover:bg-gray-100">
                         <td class="py-3 px-6">${t.matakuliah}</td>
                         <td class="py-3 px-6">${t.Namatugas}</td>
+                        <td class="py-3 px-6">${t.Noted}</td>
                         <td class="py-3 px-6">${t.deadline}</td>
                         <td class="py-3 px-6">${t.kelompok ? '✅' : '❌'}</td>
                         <td class="py-3 px-6">${t.vclass ? '✅' : '❌'}</td>
@@ -323,8 +322,6 @@ body.dark-theme .border-gray-200 {
                     </tr>
                 `).join('');
         }
-
-        // user cuma bisa cek 1 aja
         [filterKelompok, filterVclass, filterPraktikum, filterIlab, filterMandiri].forEach(filter => {
             filter.addEventListener('change', (event) => {
                 if (event.target.checked) {
@@ -405,7 +402,6 @@ body.dark-theme .border-gray-200 {
                 if (subscription) {
                     await subscription.unsubscribe();
                     
-                    // Hapus dari database
                     await fetch('/unsubscribe', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -418,7 +414,6 @@ body.dark-theme .border-gray-200 {
                 }
                 localStorage.removeItem('reminder-enabled');
                 
-                // Reset notification permission (harus manual di browser settings)
                 Swal.fire('Reminder dinonaktifkan', 'Untuk menghapus izin notifikasi sepenuhnya, silakan reset permission di pengaturan browser.', 'info');
                 
                 showStatus();
@@ -462,7 +457,6 @@ body.dark-theme .border-gray-200 {
         showStatus();
         if (isReminderEnabled()) registerServiceWorker();
 
-        // --- Reminder Scheduler ---
         function getTodayYMD() {
             const d = new Date();
             return d.toISOString().split('T')[0];
