@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Tugas Mahasiswa</title>
+    <title>Dashboard Tugas Mahasiswa 3KA14</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -110,12 +110,12 @@
             </div>
 
         <div class="flex flex-wrap gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
-            <button onclick="setFilter('all')" class="filter-btn active px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="all">Semua</button>
-            <button onclick="setFilter('kelompok')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="kelompok">Kelompok</button>
-            <button onclick="setFilter('vclass')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="vclass">VClass</button>
-            <button onclick="setFilter('praktikum')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="praktikum">Praktikum</button>
-            <button onclick="setFilter('ilab')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="ilab">iLab</button>
-            <button onclick="setFilter('mandiri')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="mandiri">Mandiri</button>
+            <button onclick="setCategoryFilter('all')" class="filter-btn active px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-category="all">Semua</button>
+            <button onclick="setCategoryFilter('kelompok')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-category="kelompok">Kelompok</button>
+            <button onclick="setCategoryFilter('vclass')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-category="vclass">VClass</button>
+            <button onclick="setCategoryFilter('praktikum')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-category="praktikum">Praktikum</button>
+            <button onclick="setCategoryFilter('ilab')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-category="ilab">iLab</button>
+            <button onclick="setCategoryFilter('mandiri')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-category="mandiri">Mandiri</button>
         </div>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
@@ -190,11 +190,10 @@
 
         function setCategoryFilter(category) {
             activeCategory = category;
-            document.querySelectorAll('.category-btn').forEach(btn => {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
                 if(btn.dataset.category === category) btn.classList.add('active');
                 else btn.classList.remove('active');
             });
-
             renderTasks();
         }
 
@@ -204,7 +203,6 @@
                 if(btn.dataset.status === status) btn.classList.add('active');
                 else btn.classList.remove('active');
             });
-
             renderTasks();
         }
 
@@ -297,9 +295,7 @@
             const container = document.getElementById('taskContainer');
             container.innerHTML = '';
 
-            // FILTERING GANDA (Kategori DAN Status)
             const filteredTasks = globalTasks.filter(t => {
-                // 1. Cek Kategori
                 let categoryMatch = false;
                 if (activeCategory === 'all') categoryMatch = true;
                 else if (activeCategory === 'kelompok' && t.kelompok) categoryMatch = true;
@@ -308,11 +304,11 @@
                 else if (activeCategory === 'ilab' && t.ilab) categoryMatch = true;
                 else if (activeCategory === 'mandiri' && t.Mandiri) categoryMatch = true;
 
-                // 2. Cek Status
                 let statusMatch = false;
                 if (activeStatus === 'all') statusMatch = true;
                 else if (activeStatus === 'completed' && t.isCompleted) statusMatch = true;
                 else if (activeStatus === 'pending' && !t.isCompleted) statusMatch = true;
+                
                 return categoryMatch && statusMatch;
             });
 
