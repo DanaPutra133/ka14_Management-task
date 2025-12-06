@@ -1214,7 +1214,7 @@ const makeEmbed = (type, tasks) => {
     value: `• ${t.Namatugas || "-"}\n• Deadline: ${new Date(
       t.deadline
     ).toLocaleDateString("id-ID")}\n• Kategori: ${getKategori(t)}\n${
-      t.UrlGambar ? `• URL: ${t.UrlGambar}\n` : ""
+      t.UrlGambar ? `• URL: ${t.UrlGambar}\n` : "" 
     }`,
     inline: false,
   }));
