@@ -1201,9 +1201,10 @@ const getKategori = (task) => {
 // this embed maker -> di ubah di sini kalau mau ganti style ngirim nya
 const makeEmbed = (type, tasks) => {
   const map = {
-    H3: { color: 0xffd93d, title: "🔔 REMINDER H-3 DEADLINE TUGAS! 🔔" },
-    H1: { color: 0xff4d4d, title: "🚨 FINAL REMINDER H-1 DEADLINE TUGAS! 🚨" },
-    H: { color: 0x4caf50, title: "✅ HARI-H DEADLINE TUGAS! ✅" },
+    // H3: { color: 0xffd93d, title: "🔔 REMINDER H-3 DEADLINE TUGAS! 🔔" },
+    // H1: { color: 0xff4d4d, title: "🚨 FINAL REMINDER H-1 DEADLINE TUGAS! 🚨" },
+    // H: { color: 0x4caf50, title: "✅ HARI-H DEADLINE TUGAS! ✅" },
+    H: { color: 0x4caf50, title: "✅Jadwal UTS Hari ini! ✅" },
   };
   const s = map[type];
   if (!s || !tasks || !tasks.length) return null;
