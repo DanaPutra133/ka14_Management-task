@@ -54,6 +54,9 @@ model User {
   npm        String   @id 
   pin        String  
   email      String
+  nama         String?
+  noHp         String?
+  fotoProfile  String?
   isApproved Boolean  @default(false) 
   isEditor   Boolean  @default(false)
   lastLogin  DateTime?

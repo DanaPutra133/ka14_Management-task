@@ -7,7 +7,7 @@ const path = require('path');
 const cron = require('node-cron');
 const cronService = require('./services/cronService');
 const session = require('express-session');
-
+const maintenanceMiddleware = require("./middleware/maintenance");
 
 const webpush = require('web-push');
 const axios = require('axios');
@@ -27,7 +27,7 @@ const prisma = new PrismaClient();
 // const tugasRoutes = require('./router/tugas');
 
 const app = express();
-
+app.use(maintenanceMiddleware);
 // environment variables
 const port = process.env.PORT_SERVER || process.env.PORT; 
 const ADMIN_PIN = process.env.ADMIN_PIN;
@@ -53,6 +53,23 @@ const verifyAdmin = (req, res, next) => {
     req.userAdmin = decoded;
     next();
   });
+};
+
+
+
+const checkUploadAccess = (req, res, next) => {
+    if (req.headers['authorization']) {
+        const token = req.headers['authorization'].split(' ')[1];
+        try {
+            jwt.verify(token, process.env.JWT_SECRET || "rahasia_negara_api");
+            return next(); 
+        } catch (e) {}
+    }
+    if (req.session && req.session.user) {
+        return next();
+    }
+
+    return res.status(403).json({ error: 'Akses ditolak. Anda belum login.' });
 };
 
 const verifyEditorOrAdmin = (req, res, next) => {
@@ -127,23 +144,27 @@ app.use(express.static('public'));
 app.use('/views', express.static(path.join(__dirname, 'views')));
 
 // ==================== SERVICE UPLOADER PROXY ====================
-app.post('/upload-proxy', verifyEditorOrAdmin, upload.single('image'), async (req, res) => {
+app.post('/upload-proxy', checkUploadAccess, upload.single('image'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ error: 'Tidak ada file yang diupload' });
+
         const form = new FormData();
         form.append('image', req.file.buffer, req.file.originalname);
+
         const targetUrl = `${process.env.UPLOADER_URL}?apikey=${process.env.UPLOADER_APIKEY}`;
+
         const response = await axios.post(targetUrl, form, {
-            headers: {
-                ...form.getHeaders()
-            }
+            headers: { ...form.getHeaders() }
         });
+
         res.json(response.data);
     } catch (error) {
         console.error('Upload Error:', error.response?.data || error.message);
-        res.status(500).json({ error: 'Gagal mengupload gambar ke server luar.' });
+        res.status(500).json({ error: 'Gagal mengupload gambar.' });
     }
 });
+
+
 
 // ==================== ADMIN ROUTES ====================
 
@@ -269,12 +290,13 @@ app.get("/api/admin/users", verifyAdmin, async (req, res) => {
       const completedCount = u.taskProgress.filter((t) => t.isCompleted).length;
       return {
         npm: u.npm,
+        nama: u.nama,
         email: u.email,
         isApproved: u.isApproved,
         isEditor: u.isEditor,
         lastLogin: u.lastLogin,
         createdAt: u.createdAt,
-        progress: `${completedCount} / ${totalTugas}`, 
+        progress: `${completedCount} / ${totalTugas}`,
         progressPercent:
           totalTugas > 0 ? Math.round((completedCount / totalTugas) * 100) : 0,
       };
@@ -289,19 +311,39 @@ app.get("/api/admin/users", verifyAdmin, async (req, res) => {
 app.get("/api/admin/users/:npm", verifyAdmin, async (req, res) => {
   try {
     const { npm } = req.params;
+
     const user = await prisma.user.findUnique({
       where: { npm },
-      include: { taskProgress: { include: { tugas: true } } }, 
+      include: { taskProgress: true }, 
     });
 
     if (!user) return res.status(404).json({ error: "User tidak ditemukan!" });
 
-    res.json(user);
+    const allTasks = await prisma.tugasMhs.findMany({
+      orderBy: { deadline: "asc" },
+    });
+
+    const taskDetails = allTasks.map((task) => {
+      const prog = user.taskProgress.find((p) => p.tugasId === task.id);
+      return {
+        matakuliah: task.matakuliah,
+        namatugas: task.Namatugas,
+        isCompleted: prog ? prog.isCompleted : false, 
+        catatan: prog ? prog.catatan : "-",
+      };
+    });
+
+    // Kirim Data Lengkap
+    res.json({
+      npm: user.npm,
+      nama: user.nama, // <--- TAMBAH INI
+      email: user.email,
+      tasks: taskDetails, // List tugas lengkap dengan status
+    });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
-
 app.delete("/api/admin/users/:npm", verifyAdmin, async (req, res) => {
   try {
     const { npm } = req.params;
@@ -545,13 +587,15 @@ app.get("/api/student/class-progress", requireStudent, async (req, res) => {
     });
 
     const totalTugas = await prisma.tugasMhs.count();
+    
     const data = users.map((u) => {
       const completedCount = u.taskProgress.filter((t) => t.isCompleted).length;
-      const percent =
-        totalTugas > 0 ? Math.round((completedCount / totalTugas) * 100) : 0;
+      const percent = totalTugas > 0 ? Math.round((completedCount / totalTugas) * 100) : 0;
+      const displayName = u.nama ? u.nama : u.npm;
 
       return {
-        npm: u.npm,
+        npm: u.npm,         
+        displayName: displayName,
         completed: completedCount,
         total: totalTugas,
         percent: percent,
@@ -600,6 +644,45 @@ app.get(
     }
   }
 );
+
+
+app.get("/api/student/profile", requireStudent, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { npm: req.session.user.npm },
+      select: {
+        npm: true,
+        email: true,
+        nama: true,
+        noHp: true,
+        fotoProfile: true,
+      },
+    });
+    res.json(user);
+  } catch (e) {
+    res.status(500).json({ error: "Gagal mengambil data profile" });
+  }
+});
+
+app.put("/api/student/profile", requireStudent, async (req, res) => {
+  try {
+    const { nama, noHp, fotoProfile } = req.body; 
+
+    await prisma.user.update({
+      where: { npm: req.session.user.npm },
+      data: {
+        nama: nama || null,
+        noHp: noHp || null,
+        fotoProfile: fotoProfile || null,
+      },
+    });
+
+    res.json({ success: true, message: "Profile berhasil disimpan!" });
+  } catch (e) {
+    res.status(500).json({ error: "Gagal update profile" });
+  }
+});
+
 
 
 

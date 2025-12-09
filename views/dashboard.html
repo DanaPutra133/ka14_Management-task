@@ -62,11 +62,22 @@
         
         <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Dashboard Tugas</h1>
-                <p class="text-gray-500 dark:text-gray-400 text-sm">Kelola tugas akademikmu dengan mudah</p>
+                <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Dashboard Tugas
+                    <span id="displayNpm" class="text-sm font-mono font-medium bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-md hidden">
+                        ...
+                    </span>
+                
+                <p class="text-gray-500 dark:text-gray-400 text-sm">Web Mengelola tugas khusus 3ka14</p>
             </div>
 
             <div class="flex items-center gap-2 bg-white dark:bg-dark-card p-1.5 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                
+                <button onclick="openProfileModal()" class="w-9 h-9 rounded-full border border-gray-200 dark:border-gray-600 overflow-hidden hover:ring-2 hover:ring-blue-500 transition mr-1" title="Profile Saya">
+                    <img id="headerAvatar" src="./img/splash2.jpg" class="w-full h-full object-cover">
+                </button>
+
+                <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+
                 <span id="editorBtnPlace"></span>
 
                 <button onclick="openClassModal()" class="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition text-blue-600 dark:text-blue-400" title="Progress Kelas">
@@ -100,24 +111,24 @@
                 <div id="progressBar" class="bg-blue-600 dark:bg-blue-500 h-full rounded-full" style="width: 0%"></div>
             </div>
         </div>
-
         <div class="mb-6 space-y-3">
         <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
                 <span class="text-xs font-bold text-gray-500 uppercase tracking-wider mr-1">Status:</span>
                 <button onclick="setStatusFilter('all')" class="status-btn active px-3 py-1 rounded-full border border-gray-200 dark:border-gray-700 text-xs font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition" data-status="all">Semua</button>
                 <button onclick="setStatusFilter('completed')" class="status-btn px-3 py-1 rounded-full border border-green-200 dark:border-green-800 text-xs font-medium bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 hover:bg-green-100 transition" data-status="completed">Selesai</button>
                 <button onclick="setStatusFilter('pending')" class="status-btn px-3 py-1 rounded-full border border-red-200 dark:border-red-800 text-xs font-medium bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 hover:bg-red-100 transition" data-status="pending">Belum</button>
-            </div>
+            </div>        
+        </div>
 
         <div class="flex flex-wrap gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
-            <button onclick="setCategoryFilter('all')" class="filter-btn active px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-category="all">Semua</button>
-            <button onclick="setCategoryFilter('kelompok')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-category="kelompok">Kelompok</button>
-            <button onclick="setCategoryFilter('vclass')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-category="vclass">VClass</button>
-            <button onclick="setCategoryFilter('praktikum')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-category="praktikum">Praktikum</button>
-            <button onclick="setCategoryFilter('ilab')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-category="ilab">iLab</button>
-            <button onclick="setCategoryFilter('mandiri')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-category="mandiri">Mandiri</button>
+            <button onclick="setCategoryFilter('all')" class="filter-btn active px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="all">Semua</button>
+            <button onclick="setCategoryFilter('kelompok')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="kelompok">Kelompok</button>
+            <button onclick="setCategoryFilter('vclass')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="vclass">VClass</button>
+            <button onclick="setCategoryFilter('praktikum')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="praktikum">Praktikum</button>
+            <button onclick="setCategoryFilter('ilab')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="ilab">iLab</button>
+            <button onclick="setCategoryFilter('mandiri')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="mandiri">Mandiri</button>
         </div>
-        </div>
+
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             <div class="bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700 p-4 rounded-xl flex items-center justify-between shadow-sm">
                 <div><p class="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wide">Total Tugas</p><h2 class="text-2xl font-bold text-gray-800 dark:text-white mt-1" id="totalCount">0</h2></div>
@@ -136,6 +147,58 @@
         <div id="loading" class="hidden"><div class="loader"></div></div>
         <div id="taskContainer" class="grid gap-4 transition-all duration-300"></div>
 
+    </div>
+
+    <div id="profileModal" class="fixed inset-0 z-[1000] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 transition-opacity duration-300" onclick="closeProfileModal()">
+        <div class="relative bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-2xl max-w-md w-full mx-4 transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
+            
+            <div class="flex justify-between items-start mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white">Profile Saya</h3>
+                <button onclick="closeProfileModal()" class="text-gray-500 hover:text-red-500 transition"><i class="ph ph-x text-xl"></i></button>
+            </div>
+
+            <form id="profileForm" class="space-y-4">
+                <div class="flex flex-col items-center mb-4">
+                    <div class="relative group cursor-pointer" onclick="document.getElementById('profileUpload').click()">
+                        <img id="previewProfile" src="https://ui-avatars.com/api/?name=User" class="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-gray-700 shadow-md group-hover:opacity-75 transition">
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                            <i class="ph ph-camera text-white text-2xl drop-shadow-md"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">Klik foto untuk ganti</p>
+                    
+                    <input type="file" id="profileUpload" class="hidden" accept="image/*" onchange="uploadProfilePic(this)">
+                    <input type="hidden" id="profileUrlInput">
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">NPM</label>
+                        <input type="text" id="profNpm" disabled class="w-full bg-gray-100 dark:bg-gray-700 border-none rounded-lg p-2.5 text-sm text-gray-500 font-mono">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Nama Lengkap</label>
+                        <input type="text" id="profNama" placeholder="Masukkan nama..." class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-2.5 text-sm dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Email</label>
+                            <input type="email" id="profEmail" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-2.5 text-sm dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">No. Handphone</label>
+                            <input type="text" id="profHp" placeholder="08xxxxx" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-2.5 text-sm dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium shadow-md transition mt-4">
+                    Simpan Perubahan
+                </button>
+            </form>
+        </div>
     </div>
 
     <div id="universalModal" class="fixed inset-0 z-[999] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 transition-opacity duration-300" onclick="closeModal()">
@@ -170,10 +233,11 @@
                             <th class="px-6 py-4">Mahasiswa</th>
                             <th class="px-6 py-4">Progress Tugas</th>
                             <th class="px-6 py-4 text-right">Status</th>
+                            <th class="px-6 py-4 text-center">Detail</th>
                         </tr>
                     </thead>
                     <tbody id="classProgressBody" class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
-                        <tr><td colspan="3" class="text-center py-6 text-gray-500">Memuat data...</td></tr>
+                        <tr><td colspan="4" class="text-center py-6 text-gray-500">Memuat data...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -187,7 +251,6 @@
         let activeCategory = 'all'; 
         let activeStatus = 'all';
         let globalTasks = [];
-
         function setCategoryFilter(category) {
             activeCategory = category;
             document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -205,7 +268,6 @@
             });
             renderTasks();
         }
-
         function initTheme() {
             const html = document.documentElement;
             const icon = document.getElementById('themeIcon');
@@ -233,7 +295,7 @@
             const btnList = document.getElementById('btnList');
             const btnGrid = document.getElementById('btnGrid');
             const container = document.getElementById('taskContainer');
-            const activeClass = ['bg-blue-100', 'text-blue-600', 'dark:bg-blue-900', 'dark:text-blue-300'];
+            const activeClass = ['bg-blue-100', 'text-blue-600', 'dark:bg-blue-900', 'dark:text-blue-300'];  
             btnList.classList.remove(...activeClass);
             btnGrid.classList.remove(...activeClass);
             if (currentLayout === 'list') {
@@ -264,6 +326,7 @@
                 globalTasks = tasks.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
                 loader.classList.add('hidden');
                 checkIfEditor(); 
+                updateHeaderAvatar(); 
                 renderTasks(); 
                 updateStats(); 
             } catch (e) {
@@ -277,6 +340,7 @@
                 const res = await fetch('/api/check-session');
                 const data = await res.json();
                 const container = document.getElementById('editorBtnPlace');
+
                 if (data.user && data.user.isEditor) {
                     if(!document.getElementById('btnEditor')) {
                         const btn = document.createElement('a');
@@ -290,13 +354,121 @@
                 }
             } catch (e) { console.error(e); }
         }
+        async function openProfileModal() {
+            const modal = document.getElementById('profileModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.firstElementChild.classList.remove('scale-95');
+                modal.firstElementChild.classList.add('scale-100');
+            }, 10);
+
+            try {
+                const res = await fetch('/api/student/profile');
+                const user = await res.json();
+
+                document.getElementById('profNpm').value = user.npm;
+                document.getElementById('profEmail').value = user.email;
+                document.getElementById('profNama').value = user.nama || '';
+                document.getElementById('profHp').value = user.noHp || '';
+                document.getElementById('profileUrlInput').value = user.fotoProfile || '';
+
+                const defaultAvatar = `./img/splash2.jpg`;
+                document.getElementById('previewProfile').src = user.fotoProfile || defaultAvatar;
+
+            } catch (e) { console.error("Gagal load profile", e); }
+        }
+
+        function closeProfileModal() {
+            const modal = document.getElementById('profileModal');
+            modal.classList.add('opacity-0');
+            modal.firstElementChild.classList.remove('scale-100');
+            modal.firstElementChild.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        async function uploadProfilePic(input) {
+            const file = input.files[0];
+            if(!file) return;
+
+            const imgEl = document.getElementById('previewProfile');
+            imgEl.style.opacity = '0.5';
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const res = await fetch('/upload-proxy', {
+                    method: 'POST', body: formData
+                });
+                const data = await res.json();
+
+                if(data.url) {
+                    document.getElementById('profileUrlInput').value = data.url;
+                    imgEl.src = data.url;
+                    document.getElementById('headerAvatar').src = data.url;
+                } else {
+                    Swal.fire('Error', 'Gagal upload foto', 'error');
+                }
+            } catch (e) {
+                Swal.fire('Error', 'Terjadi kesalahan upload', 'error');
+            } finally {
+                imgEl.style.opacity = '1';
+            }
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                nama: document.getElementById('profNama').value,
+                email: document.getElementById('profEmail').value,
+                noHp: document.getElementById('profHp').value,
+                fotoProfile: document.getElementById('profileUrlInput').value
+            };
+
+            try {
+                const res = await fetch('/api/student/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if(data.success) {
+                    Swal.fire({ icon: 'success', title: 'Tersimpan', text: 'Data profile berhasil diperbarui', timer: 1500, showConfirmButton: false });
+                    closeProfileModal();
+                    updateHeaderAvatar();
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (e) {
+                Swal.fire('Gagal', 'Gagal menyimpan profile', 'error');
+            }
+        });
+
+        async function updateHeaderAvatar() {
+            try {
+                const res = await fetch('/api/student/profile');
+                const user = await res.json();
+                const avatar = user.fotoProfile || `./img/splash2.jpg`;
+                document.getElementById('headerAvatar').src = avatar;
+                const npmBadge = document.getElementById('displayNpm');
+                if (user.npm) {
+                    npmBadge.innerText = user.npm;
+                    npmBadge.classList.remove('hidden'); 
+                }
+
+            } catch(e) {
+                console.error("Gagal load info header", e);
+            }
+        }
 
         function renderTasks() {
             const container = document.getElementById('taskContainer');
             container.innerHTML = '';
 
             const filteredTasks = globalTasks.filter(t => {
-                let categoryMatch = false;
+               let categoryMatch = false;
                 if (activeCategory === 'all') categoryMatch = true;
                 else if (activeCategory === 'kelompok' && t.kelompok) categoryMatch = true;
                 else if (activeCategory === 'vclass' && t.vclass) categoryMatch = true;
@@ -322,10 +494,8 @@
             filteredTasks.forEach(t => {
                 const deadlineDate = new Date(t.deadline);
                 const diffDays = Math.ceil((deadlineDate - new Date()) / (1000 * 60 * 60 * 24)); 
-                
                 let badgeClass = 'bg-blue-50 text-blue-700 border border-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800';
                 let badgeText = `${diffDays} Hari Lagi`;
-                
                 if (t.isCompleted) {
                     badgeClass = 'bg-green-50 text-green-700 border border-green-100 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800';
                     badgeText = 'Selesai';
@@ -338,7 +508,6 @@
                 } else if(diffDays <= 3) {
                     badgeClass = 'bg-yellow-50 text-yellow-700 border border-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800';
                 }
-
                 const tags = [
                     t.kelompok ? {l:'Kelompok', c:'indigo'} : null,
                     t.vclass ? {l:'VClass', c:'purple'} : null,
@@ -346,16 +515,13 @@
                     t.praktikum ? {l:'Praktikum', c:'pink'} : null,
                     t.ilab ? {l:'iLab', c:'teal'} : null,
                 ].filter(Boolean).map(tag => `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-${tag.c}-50 text-${tag.c}-700 border border-${tag.c}-100 dark:bg-${tag.c}-900/30 dark:text-${tag.c}-300 dark:border-${tag.c}-800">${tag.l}</span>`).join('');
-
                 const statusClass = t.isCompleted ? 'border-l-4 border-green-500 opacity-90' : 'border-l-4 border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500';
                 const textColor = t.isCompleted ? 'text-gray-400 line-through dark:text-gray-500' : 'text-gray-800 dark:text-gray-100';
-
                 const imgBtn = t.UrlGambar ? `<button onclick="openModal('image', '${t.UrlGambar}')" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1.5 text-xs font-semibold bg-blue-50 dark:bg-blue-900/20 px-2.5 py-1.5 rounded-lg transition border border-blue-100 dark:border-blue-800/50"><i class="ph ph-image text-lg"></i> Gambar</button>` : '';
-                const safeNote = t.Noted ? t.Noted.replace(/'/g, "\\'").replace(/"/g, '&quot;') : '';
                 const hasNote = t.Noted && t.Noted.trim() !== '-' && t.Noted.trim() !== '';
+                const safeNote = t.Noted ? t.Noted.replace(/'/g, "\\'").replace(/"/g, '&quot;') : '';
                 const noteBtn = hasNote ? `<button onclick="openModal('text', '${safeNote}')" class="text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 flex items-center gap-1.5 text-xs font-semibold bg-purple-50 dark:bg-purple-900/20 px-2.5 py-1.5 rounded-lg transition border border-purple-100 dark:border-purple-800/50"><i class="ph ph-info text-lg"></i> Info</button>` : '';
                 const actionButtons = `<div class="flex gap-2">${imgBtn}${noteBtn}</div>`;
-
                 let html = '';
                 if (currentLayout === 'list') {
                     html = `<div class="task-card ${statusClass} relative p-4 rounded-xl bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row gap-4 items-start sm:items-center"><div class="flex-shrink-0 pt-1 sm:pt-0"><input type="checkbox" class="custom-checkbox text-green-500 border-gray-300 dark:border-gray-500" onchange="toggleTask(${t.id}, this.checked)" ${t.isCompleted ? 'checked' : ''}></div><div class="flex-grow w-full"><div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-1"><h3 class="font-bold text-lg ${textColor}">${t.matakuliah}</h3><div class="flex gap-2 items-center self-start sm:self-auto">${actionButtons} <span class="px-2.5 py-0.5 rounded text-xs font-medium ${badgeClass}">${badgeText}</span></div></div><div class="flex flex-wrap gap-2 items-center mb-2"><span class="text-sm font-semibold text-gray-700 dark:text-gray-300">${t.Namatugas}</span><span class="text-xs text-gray-400">| ${deadlineDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}</span></div><div class="flex gap-2 mb-3">${tags}</div><input type="text" value="${t.catatan || ''}" placeholder="Tulis catatan..." class="w-full bg-transparent border-b border-gray-200 dark:border-gray-700 text-sm py-1 text-gray-600 dark:text-gray-300 focus:outline-none focus:border-blue-500 transition-colors" onblur="saveNote(${t.id}, this.value)"></div></div>`;
@@ -389,14 +555,13 @@
         async function openClassModal() {
             const modal = document.getElementById('classModal');
             const tbody = document.getElementById('classProgressBody');
-                        const thead = document.querySelector('#classModal thead tr');
+             const thead = document.querySelector('#classModal thead tr');
             if (thead.children.length === 3) { 
                 const th = document.createElement('th');
                 th.className = "px-4 py-3 text-center rounded-tr-lg";
                 th.innerText = "Detail";
                 thead.appendChild(th);
             }
-            
             modal.classList.remove('hidden');
             setTimeout(() => {
                 modal.firstElementChild.classList.remove('scale-95');
@@ -413,13 +578,15 @@
                     let color = 'bg-red-500';
                     if(u.percent >= 50 && u.percent < 100) color = 'bg-yellow-500';
                     if(u.percent === 100) color = 'bg-green-500';
-
                     let statusBadge = '<span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs font-semibold">Proses</span>';
                     if(u.percent === 100) statusBadge = '<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-semibold">Selesai</span>';
 
                     const row = `
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors border-b dark:border-gray-700">
-                            <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">${u.npm}</td>
+                            <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                                ${u.displayName}
+                                ${u.displayName !== u.npm ? `<br><span class="text-xs text-gray-400 font-mono">${u.npm}</span>` : ''} 
+                            </td>
                             <td class="px-6 py-4 w-1/2">
                                 <div class="flex justify-between mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">
                                     <span>${u.completed} / ${u.total}</span>
@@ -429,7 +596,7 @@
                                     <div class="${color} h-2.5 rounded-full transition-all duration-500" style="width: ${u.percent}%"></div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-right">
+                           <td class="px-6 py-4 text-right">
                                 ${statusBadge}
                             </td>
                             <td class="px-4 py-4 text-center">
@@ -441,7 +608,7 @@
                     `;
                     tbody.insertAdjacentHTML('beforeend', row);
                 });
-            } catch (e) {
+             } catch (e) {
                 console.error(e);
                 tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-red-500">Gagal memuat data.</td></tr>';
             }
@@ -450,18 +617,15 @@
         async function viewStudentDetail(npm) {
             try {
                 Swal.fire({ title: 'Memuat...', didOpen: () => Swal.showLoading() });
-
                 const res = await fetch(`/api/student/class-progress/${npm}`);
                 const data = await res.json();
                 
                 let listHtml = '<div class="text-left space-y-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">';
-                
                 if(data.tasks.length === 0) {
                     listHtml += '<p class="text-center text-gray-500">Belum ada tugas.</p>';
                 } else {
                     data.tasks.forEach(t => {
                         let statusIcon, statusText, statusClass;
-                        
                         if (t.isCompleted) {
                             statusIcon = '<i class="ph ph-check-square text-lg"></i>';
                             statusText = 'Selesai';
@@ -471,17 +635,16 @@
                             statusText = 'Proses';
                             statusClass = 'text-gray-600 font-medium';
                         }
-
                         listHtml += `
                             <div class="border-b border-gray-200 dark:border-gray-700 pb-3 last:border-0">
                                 <h4 class="font-bold text-gray-800 dark:text-gray-200 text-sm leading-snug">
                                     ${t.matakuliah} - ${t.namatugas}
-                                </h4>
+                                </h4>                                
                                 <div class="flex items-center gap-2 mt-1 text-sm">
                                     <span class="text-gray-500 dark:text-gray-400">Status:</span>
                                     <span class="flex items-center gap-1 ${statusClass}">
                                         ${statusIcon} ${statusText}
-                                    </span>
+                                    </span>                                
                                 </div>
                             </div>
                         `;
@@ -502,11 +665,10 @@
                         popup: 'rounded-xl dark:bg-gray-800 border dark:border-gray-700'
                     }
                 });
-
             } catch (e) {
                 console.error(e);
                 Swal.fire('Error', 'Gagal ambil detail', 'error');
-            }
+            }        
         }
 
         function closeClassModal() {

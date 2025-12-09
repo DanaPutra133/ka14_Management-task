@@ -65,7 +65,7 @@
             color: var(--text-default);
             font-weight: 600;
         }
-        tr:hover { background-color: var(--hover-row); }
+        tr:hover { background: var(--hover-row); }
 
         .floating-theme-toggle {
             position: fixed;
@@ -73,6 +73,11 @@
             right: 1rem;
             z-index: 1000;
         }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
+        .dark-theme .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; }
     </style>
 </head>
 <body class="p-4 sm:p-6 lg:p-8">
@@ -104,7 +109,7 @@
                 <thead class="text-xs uppercase">
                     <tr>
                         <th class="px-6 py-3">NPM</th>
-                        <th class="px-6 py-3">Email</th>
+                        <th class="px-6 py-3">Nama</th> <th class="px-6 py-3">Email</th>
                         <th class="px-6 py-3">Terakhir Login</th>
                         <th class="px-6 py-3">Progress Tugas</th>
                         <th class="px-6 py-3">Status</th>
@@ -112,7 +117,7 @@
                     </tr>
                 </thead>
                 <tbody id="userTableBody">
-                    <tr><td colspan="6" class="text-center py-4">Memuat data...</td></tr>
+                    <tr><td colspan="7" class="text-center py-4">Memuat data...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -177,7 +182,7 @@
             tbody.innerHTML = '';
 
             if (users.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">Belum ada mahasiswa.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">Belum ada mahasiswa.</td></tr>';
                 return;
             }
 
@@ -190,25 +195,27 @@
                 if(u.progressPercent > 50) progressColor = 'bg-yellow-500';
                 if(u.progressPercent === 100) progressColor = 'bg-green-500';
 
-               const isEditor = u.isEditor; 
+                const isEditor = u.isEditor; 
                 const iconClass = isEditor ? 'ph-star ph-fill' : 'ph-star'; 
                 const starColor = isEditor ? 'text-yellow-600' : 'text-yellow-400'; 
                 const starTitle = isEditor ? 'Cabut Akses Editor' : 'Jadikan Editor';
 
+                const displayName = u.nama ? `<span class="font-semibold ">${u.nama}</span>` : '<span class="text-gray-400 italic">-</span>';
+
                 const html = `
-                    <tr class="border-b transition-colors">
-                        <td class="px-6 py-4 font-medium">${u.npm}</td>
-                        <td class="px-6 py-4">${u.email}</td>
-                        <td class="px-6 py-4">${lastLogin}</td>
+                    <tr class="border-b transition-colors dark:hover:bg-gray-800/50">
+                        <td class="px-6 py-4 font-medium font-mono">${u.npm}</td>
+                        <td class="px-6 py-4">${displayName}</td> <td class="px-6 py-4">${u.email}</td>
+                        <td class="px-6 py-4 text-xs">${lastLogin}</td>
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-2">
-                                <span class="text-xs font-semibold">${u.progress}</span>
-                                <div class="w-24 bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                                    <div class="${progressColor} h-2.5 rounded-full" style="width: ${u.progressPercent}%"></div>
+                                <span class="text-xs font-semibold w-10 text-right">${u.progress}</span>
+                                <div class="w-20 bg-gray-200 rounded-full h-2 dark:bg-gray-700 overflow-hidden">
+                                    <div class="${progressColor} h-2 rounded-full" style="width: ${u.progressPercent}%"></div>
                                 </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4">
+                         <td class="px-6 py-4">
                             ${u.isApproved 
                                 ? '<span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">Aktif</span>' 
                                 : '<span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-yellow-900 dark:text-yellow-300">Pending</span>'}
@@ -229,24 +236,86 @@
             });
         }
 
+        async function viewDetail(npm) {
+            try {
+                Swal.fire({ title: 'Memuat data...', didOpen: () => Swal.showLoading() });
+
+                const res = await fetch(`${API_URL}/${npm}`, { headers: getHeaders() });
+                const data = await res.json();
+                
+                const titleText = data.nama ? `${data.nama} (${data.npm})` : `Mahasiswa ${data.npm}`;
+                let listHtml = '<div class="text-left space-y-3 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">';
+                
+                if(data.tasks.length === 0) {
+                    listHtml += '<p class="text-center text-gray-500 py-4">Belum ada tugas di database.</p>';
+                } else {
+                    data.tasks.forEach(t => {
+                        let statusIcon, statusText, statusClass;
+                        
+                        if (t.isCompleted) {
+                            statusIcon = '<i class="ph ph-check-square text-lg"></i>';
+                            statusText = 'Selesai';
+                            statusClass = 'text-green-600 font-semibold';
+                        } else {
+                            statusIcon = '<i class="ph ph-hourglass text-lg"></i>';
+                            statusText = 'Proses';
+                            statusClass = 'text-gray-500 font-medium';
+                        }
+
+                        listHtml += `
+                            <div class="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-0">
+                                <h4 class="font-bold text-gray-800 dark:text-gray-200 text-sm leading-snug">
+                                    ${t.matakuliah} - ${t.namatugas}
+                                </h4>
+                                <div class="flex items-center gap-2 mt-1 text-sm">
+                                    <span class="text-gray-500 dark:text-gray-400 text-xs">Status:</span>
+                                    <span class="flex items-center gap-1 ${statusClass} text-xs">
+                                        ${statusIcon} ${statusText}
+                                    </span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                listHtml += '</div>';
+
+                Swal.fire({
+                    title: titleText,
+                    html: listHtml,
+                    width: '600px',
+                    showCloseButton: false,
+                    showConfirmButton: true,
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#6366f1',
+                    customClass: {
+                        title: 'text-xl font-bold text-gray-800 dark:text-white mb-4',
+                        popup: 'rounded-xl dark:bg-gray-800 border dark:border-gray-700'
+                    }
+                });
+
+            } catch (e) {
+                console.error(e);
+                Swal.fire('Error', 'Gagal ambil detail', 'error');
+            }
+        }
 
         async function toggleEditor(npm, newStatus) {
-    try {
-        const res = await fetch('/api/admin/users/toggle-editor', {
-            method: 'POST',
-            headers: getHeaders(),
-            body: JSON.stringify({ npm, isEditor: newStatus })
-        });
-        const data = await res.json();
-        if(data.success) {
-            const msg = newStatus ? 'User kini menjadi EDITOR.' : 'Akses Editor dicabut.';
-            Swal.fire('Berhasil', msg, 'success');
-            loadUsers();
-        } else throw new Error(data.error);
-    } catch (e) {
-        Swal.fire('Error', e.message, 'error');
-    }
-}
+            try {
+                const res = await fetch('/api/admin/users/toggle-editor', {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ npm, isEditor: newStatus })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    const msg = newStatus ? 'User kini menjadi EDITOR.' : 'Akses Editor dicabut.';
+                    Swal.fire({ icon: 'success', title: 'Berhasil', text: msg, timer: 1500, showConfirmButton: false });
+                    loadUsers();
+                } else throw new Error(data.error);
+            } catch (e) {
+                Swal.fire('Error', e.message, 'error');
+            }
+        }
 
         async function deleteUser(npm) {
             const result = await Swal.fire({
@@ -295,57 +364,6 @@
                 } catch (e) {
                     Swal.fire('Error', 'Gagal reset PIN', 'error');
                 }
-            }
-        }
-
-        async function viewDetail(npm) {
-            try {
-                const res = await fetch(`${API_URL}/${npm}`, { headers: getHeaders() });
-                const user = await res.json();
-                
-                let taskListHtml = '<ul class="text-left text-sm space-y-2 max-h-60 overflow-y-auto">';
-                if(user.taskProgress.length === 0) {
-                    taskListHtml += '<li>Belum ada tugas yang disentuh.</li>';
-                } else {
-                    user.taskProgress.forEach(tp => {
-                        const status = tp.isCompleted ? '✅ Selesai' : '⏳ Proses';
-                        const note = tp.catatan ? `<br><span class="text-gray-500 text-xs">Catatan: ${tp.catatan}</span>` : '';
-                        taskListHtml += `<li class="border-b pb-1">
-                            <b>${tp.tugas.matakuliah} - ${tp.tugas.Namatugas}</b> <br>
-                            Status: ${status} ${note}
-                        </li>`;
-                    });
-                }
-                taskListHtml += '</ul>';
-
-                Swal.fire({
-                    title: `Detail Mahasiswa ${npm}`,
-                    html: taskListHtml,
-                    width: '600px'
-                });
-
-            } catch (e) {
-                Swal.fire('Error', 'Gagal ambil detail', 'error');
-            }
-        }
-
-        async function toggleEditor(npm, newStatus) {
-            try {
-                const res = await fetch('/api/admin/users/toggle-editor', {
-                    method: 'POST',
-                    headers: getHeaders(),
-                    body: JSON.stringify({ npm, isEditor: newStatus })
-                });
-                const data = await res.json();
-                if(data.success) {
-                    const msg = newStatus ? 'User kini menjadi EDITOR.' : 'Akses Editor dicabut.';
-                    Swal.fire({ icon: 'success', title: 'Berhasil', text: msg, timer: 1500, showConfirmButton: false });
-                    loadUsers(); 
-                } else {
-                    throw new Error(data.error);
-                }
-            } catch (e) {
-                Swal.fire('Error', e.message, 'error');
             }
         }
 

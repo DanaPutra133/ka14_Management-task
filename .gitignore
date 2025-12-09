@@ -13,3 +13,4 @@ logs.json
 .idea
 .vscode
 .DS_Store
+.hide

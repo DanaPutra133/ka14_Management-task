@@ -546,7 +546,7 @@
                         <td>3</td>
                         <td>Admin</td>
                         <td>
-                            <button class="btn btn-try" onclick="tryApi('/admin')">Login</button>
+                            <button class="btn btn-try" onclick="checkLoginAndRedirectAdmin('')">Login</button>
                         </td>
                         </td>
                     </tr>
@@ -587,6 +587,22 @@
         } catch (error) {
             console.error('Gagal cek sesi:', error);
             window.location.href = '/login-mahasiswa';
+        }
+    }
+    async function checkLoginAndRedirectAdmin() {
+        try {
+            const response = await fetch('/api/check-session');
+            const data = await response.json();
+
+            if (data.loggedIn) {
+
+                if (data.user.role === 'admin' || data.user.isEditor) {
+                    window.location.href = '/admin';
+                } 
+            } 
+        } catch (error) {
+            console.error('Gagal cek sesi:', error);
+            window.location.href = '/admin';
         }
     }
 
