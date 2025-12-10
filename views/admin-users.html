@@ -160,8 +160,9 @@
             };
         }
 
-        if (!localStorage.getItem('adminToken')) {
-            window.location.href = '/admin';
+       const token = localStorage.getItem('adminToken');
+        if (!token) {
+            window.location.href = '/login-admin'; 
         }
 
         async function loadUsers() {
@@ -309,7 +310,31 @@
                 const data = await res.json();
                 if(data.success) {
                     const msg = newStatus ? 'User kini menjadi EDITOR.' : 'Akses Editor dicabut.';
-                    Swal.fire({ icon: 'success', title: 'Berhasil', text: msg, timer: 1500, showConfirmButton: false });
+                    if (newStatus == false) {
+                       Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        imageUrl: './img/error2.jpg',
+                        imageWidth: 200,  
+                        imageHeight: 'auto',
+                        text: msg,
+                        timer: 1500, // Durasi alert 1.5 detik
+                        showConfirmButton: false,
+                        backdrop: `rgba(0,0,0,0.4)`
+                    })
+                    } else {
+                     Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        imageUrl: './img/splash2.jpg',
+                        imageWidth: 200,  
+                        imageHeight: 'auto',
+                        text: msg,
+                        timer: 1500, // Durasi alert 1.5 detik
+                        showConfirmButton: false,
+                        backdrop: `rgba(0,0,0,0.4)`
+                    })
+                }
                     loadUsers();
                 } else throw new Error(data.error);
             } catch (e) {

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Admin</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: { bg: '#0f172a', text: '#e2e8f0' }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="../img/splash1.png">
+    
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        
+        /*  DEFINISI ANIMASI MASUK (Fade In Up) */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* class untuk memanggil animasi */
+        .animate-entry {
+            animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-dark-bg text-gray-800 dark:text-dark-text min-h-screen flex items-center justify-center transition-colors duration-300">
+
+    <button onclick="toggleDarkMode()" class="fixed top-5 right-5 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition text-yellow-500 z-50">
+        <i id="themeIcon" class="ph ph-sun text-xl"></i>
+    </button>
+
+    <div class="w-full max-w-sm p-6 animate-entry">
+        
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold mb-2">Admin Login</h1>
+        </div>
+
+        <form id="loginForm" class="space-y-5">
+            
+            <div class="relative">
+                <input type="password" id="pin" class="w-full px-4 py-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition shadow-sm" placeholder="PIN Admin" required>
+                <button type="button" onclick="togglePin()" class="absolute right-3 top-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                    <i id="eyeIcon" class="ph ph-eye-slash text-xl"></i>
+                </button>
+            </div>
+
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition transform active:scale-95 shadow-md hover:shadow-lg">
+                Masuk
+            </button>
+            
+            <div class="text-center">
+                <a href="/" class="text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition">
+                    Kembali ke Home
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // --- THEME LOGIC ---
+        const html = document.documentElement;
+        const themeIcon = document.getElementById('themeIcon');
+        
+        if (localStorage.getItem('theme') === 'dark') {
+            html.classList.add('dark');
+            themeIcon.classList.replace('ph-sun', 'ph-moon');
+        }
+
+        function toggleDarkMode() {
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                themeIcon.classList.replace('ph-moon', 'ph-sun');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                themeIcon.classList.replace('ph-sun', 'ph-moon');
+            }
+        }
+
+        // --- PASSWORD TOGGLE ---
+        function togglePin() {
+            const input = document.getElementById('pin');
+            const icon = document.getElementById('eyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('ph-eye-slash', 'ph-eye');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('ph-eye', 'ph-eye-slash');
+            }
+        }
+
+        // --- LOGIN PROCESS ---
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const pin = document.getElementById('pin').value;
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerText;
+
+            // Efek Loading pada tombol
+            btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Memproses...';
+            btn.disabled = true;
+            btn.classList.add('opacity-70', 'cursor-not-allowed');
+
+            try {
+                const res = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pin })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    localStorage.setItem('adminToken', data.token);
+
+                    // ANIMASI SUKSES
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: 'Akses diterima!',
+                        imageUrl: './img/splash2.jpg',
+                        imageWidth: 200,  
+                        imageHeight: 'auto',
+                        imageAlt: 'Login Sukses',
+                        timer: 1500, // Durasi alert 1.5 detik
+                        showConfirmButton: false,
+                        backdrop: `rgba(0,0,0,0.4)`
+                    }).then(() => {
+                        window.location.href = '/admin'; 
+                    });
+
+                } else {
+                    // Jika Gagal
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Akses Ditolak',
+                        text: data.message,
+                        confirmButtonColor: '#2563eb'
+                    });
+                    
+                    // Reset Tombol
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-70', 'cursor-not-allowed');
+                }
+            } catch (error) {
+                Swal.fire('Error', 'Terjadi kesalahan pada server', 'error');
+                
+                // Reset Tombol
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                btn.classList.remove('opacity-70', 'cursor-not-allowed');
+            }
+        });
+    </script>
+</body>
+</html>

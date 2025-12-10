@@ -546,7 +546,7 @@
                         <td>3</td>
                         <td>Admin</td>
                         <td>
-                            <button class="btn btn-try" onclick="checkLoginAndRedirectAdmin('')">Login</button>
+                            <button class="btn btn-try" onclick="tryApi('/admin')">Login</button>
                         </td>
                         </td>
                     </tr>
@@ -577,10 +577,21 @@
             if (data.loggedIn) {
 
                 if (data.user.role === 'mahasiswa' || data.user.isEditor) {
-                    window.location.href = '/dashboard-user';
-                } else {
-                    window.location.href = '/admin'; 
-                }
+                     Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: 'Akses diterima!',
+                        timer: 1500, 
+                        imageUrl: './img/Good.jpg',
+                        imageWidth: 200,  
+                        imageHeight: 'auto',
+                        showConfirmButton: false,
+                        backdrop: `rgba(0,0,0,0.4)`
+                    }).then(() => {
+                         window.location.href = '/dashboard-user';
+                    });
+                   
+                } 
             } else {
                 window.location.href = '/login-mahasiswa';
             }
@@ -589,22 +600,22 @@
             window.location.href = '/login-mahasiswa';
         }
     }
-    async function checkLoginAndRedirectAdmin() {
-        try {
-            const response = await fetch('/api/check-session');
-            const data = await response.json();
+    // async function checkLoginAndRedirectAdmin() {
+    //     try {
+    //         const response = await fetch('/api/check-session');
+    //         const data = await response.json();
 
-            if (data.loggedIn) {
+    //         if (data.loggedIn) {
 
-                if (data.user.role === 'admin' || data.user.isEditor) {
-                    window.location.href = '/admin';
-                } 
-            } 
-        } catch (error) {
-            console.error('Gagal cek sesi:', error);
-            window.location.href = '/admin';
-        }
-    }
+    //             if (data.user.role === 'admin' || data.user.isEditor) {
+    //                 window.location.href = '/admin';
+    //             } 
+    //         } 
+    //     } catch (error) {
+    //         console.error('Gagal cek sesi:', error);
+    //         window.location.href = '/admin';
+    //     }
+    // }
 
         // animasi intro
         window.addEventListener('load', () => {
@@ -650,11 +661,11 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Oops!',
+                    imageUrl: './img/error2.jpg',
                     text: 'Terjadi kesalahan. Silakan coba lagi.'
                 });
             }
         });
-        // Clock function
         function updateClock() {
             const clockElement = document.getElementById('Clock');
             const now = new Date();
@@ -663,13 +674,33 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        function tryApi(endpoint) {
-            window.open(endpoint);
+        async function tryApi(endpoint) {
+            if (endpoint === '/admin') {
+                const token = localStorage.getItem('adminToken');
+                
+                if (token) {
+                     Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: 'Akses diterima!',
+                        timer: 1500, 
+                        imageUrl: './img/Good.jpg',
+                        imageWidth: 200,  
+                        imageHeight: 'auto',
+                        showConfirmButton: false,
+                        backdrop: `rgba(0,0,0,0.4)`
+                    }).then(() => {
+                        window.location.href = '/admin'; 
+                    });
+                } 
+                else {
+                    window.location.href = '/login-admin';
+                }
+                return;
+            }
+            
+            window.location.href = endpoint;
         }
-
-        // function button1(endpoint) {
-        //     window.open(endpoint)
-        // }
 
 
         const darkModeSwitch = document.getElementById("darkModeSwitch");

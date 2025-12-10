@@ -148,23 +148,7 @@
         </button>
     </div>
 
-    <div id="loginCard" class="flex items-center justify-center min-h-screen">
-        <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-md card-bg-override">
-            <div class="text-center mb-6">
-                <h1 class="text-2xl font-bold">Admin Login</h1>
-                <p class="text-sm text-gray-500 mt-2">Masukkan PIN Admin untuk mengakses panel.</p>
-            </div>
-            <form id="loginForm" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium mb-1">PIN Admin</label>
-                    <input type="password" id="adminPin" placeholder="******" required class="block w-full">
-                </div>
-                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">Masuk</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="dashboardCard" class="hidden container mx-auto p-4 sm:p-6 lg:p-8">
+    <div id="dashboardCard" class="container mx-auto p-4 sm:p-6 lg:p-8">
         
         <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
             <h1 class="text-3xl font-bold mb-4 sm:mb-0">Admin Dashboard <span class="admin-badge">Admin</span></h1>
@@ -315,6 +299,7 @@
     </div>
 
     <script>
+        
         const themeIcon = document.getElementById('themeIcon');
         if (localStorage.getItem('darkMode') === 'true') {
             document.body.classList.add('dark-theme');
@@ -334,42 +319,13 @@
         const API_ADMIN = '/api/admin';
         window.onload = () => {
             const token = localStorage.getItem('adminToken');
-            if (token) {
-                showDashboard();
-                loadTugas(); 
+            if (!token) {
+                window.location.href = '/login-admin';
+                return;
             }
-        };
-
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const pin = document.getElementById('adminPin').value;
-
-            try {
-                const res = await fetch(`${API_ADMIN}/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ pin })
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    localStorage.setItem('adminToken', data.token);
-                    Swal.fire('Login Berhasil', data.message, 'success');
-                    showDashboard();
-                    loadTugas();
-                } else {
-                    Swal.fire('Gagal', data.message, 'error');
-                }
-            } catch (err) {
-                Swal.fire('Error', 'Gagal menghubungi server', 'error');
-            }
-        });
-
-        function showDashboard() {
-            document.getElementById('loginCard').classList.add('hidden');
-            document.getElementById('dashboardCard').classList.remove('hidden');
+            loadTugas(); 
             loadPendingUsers();
-        }
+        };
 
         function logout() {
             localStorage.removeItem('adminToken');
@@ -555,18 +511,33 @@
             }
         });
 
+       
+
         async function deleteTugas(index) {
-            const result = await Swal.fire({
-                title: 'Hapus Tugas?', icon: 'warning',
-                showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Ya, hapus!'
-            });
+            const result = await  Swal.fire({
+                        title: 'Hapus Tugas?',
+                        icon: 'warning',
+                        imageUrl: './img/error1.jpg',
+                        imageWidth: 200,  
+                        imageHeight: 'auto',
+                        showCancelButton: true, 
+                        confirmButtonColor: '#d33', 
+                        confirmButtonText: 'Ya, hapus!'
+                    });
 
             if (result.isConfirmed) {
                 try {
                     await fetch(`/tugas/mahasiswa/${index}`, {
                         method: 'DELETE', headers: getAuthHeaders()
                     });
-                    Swal.fire('Terhapus!', 'Data dihapus.', 'success');
+                     Swal.fire({
+                        title: 'Terhapus',
+                        icon: 'success',
+                        text: 'Data dihapus.',
+                        imageUrl: './img/splash2.jpg',
+                        imageWidth: 200,  
+                        imageHeight: 'auto',
+                    });
                     loadTugas();
                 } catch (e) {
                     Swal.fire('Error', 'Gagal menghapus', 'error');

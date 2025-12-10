@@ -6,7 +6,7 @@ const maintenanceMiddleware = (req, res, next) => {
       (req.headers.accept && req.headers.accept.indexOf("json") > -1)
     ) {}
     const imgUrl =
-      "https://uploader.danafxc.my.id/images/c559d0c0-c434-4909-a019-04f95733dab6.jpg";
+      "https://uploader.danafxc.my.id/images/6519405f-9dfd-42a9-9046-4dadc450c5cb.jpg";
 
     const htmlContent = `
             <!DOCTYPE html>

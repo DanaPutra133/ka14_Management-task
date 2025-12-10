@@ -1,0 +1,18 @@
+// Jangan di hapus, ini buat contoh webhook discord
+/*
+async function sendDiscordWebhook(message) {
+    if (!DISCORD_WEBHOOK_URL) {
+        throw new Error('DISCORD_WEBHOOK_URL belum diatur di .env');
+    }
+
+    try {
+        await axios.post(DISCORD_WEBHOOK_URL, {
+            content: message
+        });
+        console.log('Pesan webhook Discord terkirim:', message);
+    } catch (error) {
+        console.error('Gagal kirim webhook:', error.response?.data || error.message);
+        throw error;
+    }
+}
+*/

@@ -1,0 +1,23 @@
+const axios = require("axios");
+const FormData = require("form-data");
+
+exports.uploadImageProxy = async (req, res) => {
+  try {
+    if (!req.file)
+      return res.status(400).json({ error: "Tidak ada file yang diupload" });
+
+    const form = new FormData();
+    form.append("image", req.file.buffer, req.file.originalname);
+
+    const targetUrl = `${process.env.UPLOADER_URL}?apikey=${process.env.UPLOADER_APIKEY}`;
+
+    const response = await axios.post(targetUrl, form, {
+      headers: { ...form.getHeaders() },
+    });
+
+    res.json(response.data);
+  } catch (error) {
+    console.error("Upload Error:", error.response?.data || error.message);
+    res.status(500).json({ error: "Gagal mengupload gambar, hubungi dana" });
+  }
+};
