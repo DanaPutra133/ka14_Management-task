@@ -54,6 +54,18 @@ npx prisma migrate dev --name init
 npx web-push generate-vapid-keys
 ```
 
+## DB Paste
+
+```bash
+npx prisma db push
+```
+```bash
+npx prisma generate
+```
+
+## Generate vapid key 
+```bash
+npx web
 
 ## Testing push 
 ```bash
