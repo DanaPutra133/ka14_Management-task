@@ -4,9 +4,9 @@ const notifService = require("../services/notificationService");
 const cronTimezone = "Asia/Jakarta";
 
 const initCronJobs = () => {
-  if (process.env.MODE === "maintenance") {
+  if (process.env.MODE2 === "maintenance" ) {
     console.log(
-      "Maintenance Mode Aktif: Semua Cron Jobs NONAKTIF"
+      "Maintenance Mode2 Aktif: Semua Cron Jobs NONAKTIF"
     );
     return; 
   }
@@ -15,7 +15,7 @@ const initCronJobs = () => {
 
   cron.schedule(
     "0 19 * * *",
-    async () => {
+    async () => { 
       console.log("Cron 19:00 Triggered");
       await notifService.processPushReminders("H-3");
       await notifService.processPushReminders("H-1");
@@ -25,7 +25,7 @@ const initCronJobs = () => {
     { timezone: cronTimezone }
   );
   cron.schedule(
-    "0 18 * * *",
+    "0 7 * * *",
     async () => {
       console.log("Cron 07:00 Triggered");
       await notifService.processPushReminders("H");
