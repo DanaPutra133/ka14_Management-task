@@ -1,13 +1,17 @@
 const maintenanceMiddleware = (req, res, next) => {
   if (process.env.MODE === "maintenance") {
-    if (
-      req.originalUrl.startsWith("/") ||
-      req.xhr ||
-      (req.headers.accept && req.headers.accept.indexOf("json") > -1)
-    ) {}
-    const imgUrl =
-      "https://uploader.danafxc.my.id/images/6519405f-9dfd-42a9-9046-4dadc450c5cb.jpg";
-
+    let imgUrl;
+    switch (process.env.STATUS) {
+      case "libur":
+        imgUrl = "https://uploader.danafxc.my.id/images/42ce1081-8726-4622-a41b-d787951a2e97.jpg";
+        break;
+      case "ujian":
+        imgUrl = "https://uploader.danafxc.my.id/images/09c83723-b318-4609-af72-778a57cbe911.jpg";
+        break;
+      default:
+        imgUrl = "https://uploader.danafxc.my.id/images/6519405f-9dfd-42a9-9046-4dadc450c5cb.jpg";
+        break;
+    }
     const htmlContent = `
             <!DOCTYPE html>
             <html lang="id">
