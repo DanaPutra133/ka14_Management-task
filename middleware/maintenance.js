@@ -3,10 +3,10 @@ const maintenanceMiddleware = (req, res, next) => {
     let imgUrl;
     switch (process.env.STATUS) {
       case "libur":
-        imgUrl = "https://uploader.danafxc.my.id/images/42ce1081-8726-4622-a41b-d787951a2e97.jpg";
+        imgUrl = "https://uploader.danafxc.my.id/images/1d6ea1f3-f56c-4e08-8f83-dd6c296bacd0.png";
         break;
       case "ujian":
-        imgUrl = "https://uploader.danafxc.my.id/images/09c83723-b318-4609-af72-778a57cbe911.jpg";
+        imgUrl = "https://uploader.danafxc.my.id/images/f0c25df3-f696-48af-a162-e4b1236dba05.png";
         break;
       default:
         imgUrl = "https://uploader.danafxc.my.id/images/6519405f-9dfd-42a9-9046-4dadc450c5cb.jpg";
