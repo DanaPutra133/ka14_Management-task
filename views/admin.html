@@ -499,7 +499,10 @@
 
                 await Swal.fire({
                     icon: 'success', title: 'Berhasil',
-                    text: isEditing ? 'Tugas diupdate!' : 'Tugas ditambahkan!'
+                    text: isEditing ? 'Tugas berhasil diupdate!' : 'Tugas ditambahkan!',
+                    imageUrl: './img/oke.webp',
+                    imageWidth: 200,  
+                    imageHeight: 'auto',
                 });
 
                 form.reset();

@@ -133,7 +133,17 @@
                 const submitBtn = document.getElementById('submitBtn');
 
                 if (data.status === 'INVALID') {
-                    Swal.fire('Akses Ditolak', 'NPM tidak terdaftar.', 'error');
+                   Swal.fire({
+                title: 'Akses Ditolak!',
+                text: `Npm yang kamu Input gak terdaftar di Database`,
+                // icon: 'warning',
+                imageUrl: './img/maaf.webp',
+                imageWidth: 200,  
+                imageHeight: 'auto',
+                showCancelButton: false,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Ganti npm'
+            });
                 } else if (data.status === 'UNREGISTERED') {
                     // Mode REGISTRASI
                     currentMode = 'REGISTER';
@@ -206,14 +216,24 @@
                 if(data.success) {
                     Swal.fire({
                         icon: 'success',
-                        title: 'Login Berhasil',
+                        imageUrl: './img/byby.png',
+                        imageWidth: 200,  
+                        imageHeight: 'auto',
+                        title: 'Selamat Datang Kembali',
                         showConfirmButton: false,
                         timer: 1500
                     }).then(() => {
                         window.location.href = data.redirect || '/dashboard.html';
                     });
                 } else {
-                    Swal.fire('Gagal', data.message, 'error');
+                   Swal.fire({
+                title: 'Pin kamu Salah!',
+                text: `jika sudah benar tapi masih error Hubungi Dana!`,
+                // icon: 'warning',
+                imageUrl: './img/huuu.webp',
+                imageWidth: 200,  
+                imageHeight: 'auto',
+            });
                 }
             }
         });

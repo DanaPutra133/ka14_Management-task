@@ -138,10 +138,10 @@
 
                     // ANIMASI SUKSES
                     Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil',
-                        text: 'Akses diterima!',
-                        imageUrl: './img/splash2.jpg',
+                        // icon: 'success',
+                        title: 'Selamat Datang Tuan',
+                        // text: '',
+                        imageUrl: './img/selamatDatang.webp',
                         imageWidth: 200,  
                         imageHeight: 'auto',
                         imageAlt: 'Login Sukses',
@@ -155,9 +155,11 @@
                 } else {
                     // Jika Gagal
                     Swal.fire({
-                        icon: 'error',
-                        title: 'Akses Ditolak',
-                        text: data.message,
+                        // icon: 'error',
+                        title: 'Pin nya SALAH!',
+                        imageUrl: './img/angry.webp',
+                        imageWidth: 200,  
+                        imageHeight: 'auto',
                         confirmButtonColor: '#2563eb'
                     });
                     

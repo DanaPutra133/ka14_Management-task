@@ -323,7 +323,14 @@
             
             const checkIds = ['kelompok', 'vclass', 'praktikum', 'ilab', 'Mandiri'];
             if (!checkIds.some(id => document.getElementById(id).checked)) {
-                return Swal.fire('Error', 'Pilih minimal satu kategori!', 'warning');
+                return Swal.fire({
+                // title: 'Hapus User?',
+                text: `Pilih minimal satu kategori!`,
+                // icon: 'warning',
+                imageUrl: './img/angry.webp',
+                imageWidth: 200,  
+                imageHeight: 'auto',
+            });
             }
 
             const payload = {
@@ -352,7 +359,10 @@
                 if (res.ok) {
                     Swal.fire({
                         icon: 'success',
-                        title: isEditing ? 'Tugas Diupdate' : 'Tugas Dibuat',
+                        title: isEditing ? 'Tugas Berhasil Diupdate' : 'Tugas Berhasil Dibuat',
+                        imageUrl: './img/oke.webp',
+                        imageWidth: 200,  
+                        imageHeight: 'auto',
                         showConfirmButton: false,
                         timer: 1500
                     });
@@ -399,18 +409,28 @@
 
         async function deleteTugas(index) {
             const result = await Swal.fire({
-                title: 'Hapus Tugas?',
-                text: "Data tidak bisa dikembalikan!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                confirmButtonText: 'Ya, Hapus!'
-            });
+                 title: 'Hapus Tugas?',
+                 text: 'Tugas yang sudah dihapus tidak bisa di kembalikan',
+                        // icon: 'warning',
+                        imageUrl: './img/notgood.webp',
+                        imageWidth: 200,  
+                        imageHeight: 'auto',
+                        showCancelButton: true, 
+                        confirmButtonColor: '#d33', 
+                        confirmButtonText: 'Ya, hapus!'
+                    });
 
             if (result.isConfirmed) {
                 await fetch(`/tugas/mahasiswa/${index}`, { method: 'DELETE' });
                 loadTugas();
-                Swal.fire('Terhapus!', 'Tugas berhasil dihapus.', 'success');
+                Swal.fire({
+                        title: 'Terhapus',
+                        icon: 'success',
+                        text: 'Tugas berhasil dihapus.',
+                        imageUrl: './img/splash2.jpg',
+                        imageWidth: 200,  
+                        imageHeight: 'auto',
+                    });
             }
         }
 

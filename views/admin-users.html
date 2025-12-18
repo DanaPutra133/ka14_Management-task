@@ -346,7 +346,10 @@
             const result = await Swal.fire({
                 title: 'Hapus User?',
                 text: `Mahasiswa ${npm} dan semua datanya akan dihapus permanen!`,
-                icon: 'warning',
+                // icon: 'warning',
+                imageUrl: './img/notgood.webp',
+                imageWidth: 200,  
+                imageHeight: 'auto',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
                 confirmButtonText: 'Ya, Hapus!'
@@ -359,7 +362,14 @@
                     });
                     const data = await res.json();
                     if(data.success) {
-                        Swal.fire('Terhapus', data.message, 'success');
+                         Swal.fire({
+                        title: 'Terhapus',
+                        icon: 'success',
+                        text: data.message,
+                        imageUrl: './img/splash2.jpg',
+                        imageWidth: 200,  
+                        imageHeight: 'auto',
+                    });
                         loadUsers();
                     } else throw new Error(data.error);
                 } catch (e) {
