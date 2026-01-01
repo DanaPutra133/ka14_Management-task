@@ -1,7 +1,7 @@
 {
-    "name": "gunadarma-scraper-api",
+    "name": "ka14-management-tugas",
     "version": "1.0.0",
-    "description": "API for scraping Gunadarma website",
+    "description": "ka14 web management tugas",
     "main": "server.js",
     "scripts": {
         "start": "node server.js",
