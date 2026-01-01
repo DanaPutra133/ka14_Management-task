@@ -2,7 +2,7 @@
 <html lang="id" class="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard Tugas Mahasiswa 3KA14</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -40,118 +40,129 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         #progressBar { transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
-        
-        .filter-btn.active { background-color: #2563eb; color: white; border-color: #2563eb; }
-        .dark .filter-btn.active { background-color: #3b82f6; border-color: #3b82f6; }
+                .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
 
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         .dark .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; }
-        .category-btn.active { background-color: #2563eb; color: white; border-color: #2563eb; }
-        .dark .category-btn.active { background-color: #3b82f6; border-color: #3b82f6; }
+
+        .filter-btn.active { background-color: #2563eb; color: white; border-color: #2563eb; }
+        .dark .filter-btn.active { background-color: #3b82f6; border-color: #3b82f6; }
 
         .status-btn.active[data-status="all"] { background-color: #4b5563; color: white; border-color: #4b5563; }
         .status-btn.active[data-status="completed"] { background-color: #10B981; color: white; border-color: #10B981; }
         .status-btn.active[data-status="pending"] { background-color: #EF4444; color: white; border-color: #EF4444; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 dark:bg-dark-bg dark:text-dark-text min-h-screen p-4 sm:p-6 lg:p-8">
+<body class="bg-gray-50 text-gray-800 dark:bg-dark-bg dark:text-dark-text min-h-screen p-3 sm:p-6 lg:p-8 pb-20 sm:pb-8">
 
     <div class="max-w-6xl mx-auto">
         
-        <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Dashboard Tugas
-                    <span id="displayNpm" class="text-sm font-mono font-medium bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-md hidden">
-                        ...
-                    </span>
+        <header class="flex flex-col gap-2 sm:gap-4 mb-6">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white leading-tight">
+                        Dashboard Tugas
+                        <span id="displayNpm" class="inline-block text-xs font-mono font-medium bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-md align-middle ml-1 hidden">...</span>
+                    </h1>
+                    <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">Web Mengelola tugas khusus 3ka14</p>
+                </div>
                 
-                <p class="text-gray-500 dark:text-gray-400 text-sm">Web Mengelola tugas khusus 3ka14</p>
-            </div>
-
-            <div class="flex items-center gap-2 bg-white dark:bg-dark-card p-1.5 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                
-                <button onclick="openProfileModal()" class="w-9 h-9 rounded-full border border-gray-200 dark:border-gray-600 overflow-hidden hover:ring-2 hover:ring-blue-500 transition mr-1" title="Profile Saya">
+                <button onclick="openProfileModal()" class="flex-shrink-0 w-10 h-10 rounded-full border-2 border-white dark:border-gray-700 shadow-sm overflow-hidden" title="Profile Saya">
                     <img id="headerAvatar" src="./img/splash2.jpg" class="w-full h-full object-cover">
                 </button>
+            </div>
 
-                <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+            <div class="flex items-center justify-center gap-2 mt-4 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
+                <div class="flex items-center gap-2 bg-white dark:bg-dark-card p-1.5 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 flex-nowrap w-fit sm:w-auto">                    
+                    <span id="editorBtnPlace" class="flex-shrink-0"></span>
 
-                <span id="editorBtnPlace"></span>
+                    <button onclick="openClassModal()" class="flex-shrink-0 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition text-blue-600 dark:text-blue-400 flex items-center gap-2 text-sm font-medium" title="Progress Kelas">
+                        <i class="ph ph-users-three text-xl"></i>
+                        <span class="hidden sm:inline">Kelas</span>
+                    </button>
 
-                <button onclick="openClassModal()" class="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition text-blue-600 dark:text-blue-400" title="Progress Kelas">
-                    <i class="ph ph-users-three text-xl"></i>
-                </button>
+                    <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1 flex-shrink-0"></div>
 
-                <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></div>
-
-                <button onclick="setLayout('list')" id="btnList" class="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition" title="List View"><i class="ph ph-list-dashes text-xl"></i></button>
-                <button onclick="setLayout('grid')" id="btnGrid" class="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition" title="Grid View"><i class="ph ph-squares-four text-xl"></i></button>
-                
-                <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></div>
-                
-                <button onclick="toggleDarkMode()" class="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition text-yellow-500"><i id="themeIcon" class="ph ph-sun text-xl"></i></button>
-                
-                <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></div>
-                
-                <button onclick="logout()" class="flex items-center gap-2 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 rounded text-sm font-medium transition"><i class="ph ph-sign-out"></i> Keluar</button>
+                    <div class="flex bg-gray-100 dark:bg-gray-700 rounded-md p-0.5 flex-shrink-0">
+                        <button onclick="setLayout('list')" id="btnList" class="p-1.5 rounded transition" title="List View"><i class="ph ph-list-dashes text-lg"></i></button>
+                        <button onclick="setLayout('grid')" id="btnGrid" class="p-1.5 rounded transition" title="Grid View"><i class="ph ph-squares-four text-lg"></i></button>
+                    </div>
+                    
+                    <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1 flex-shrink-0"></div>
+                    
+                    <button onclick="toggleDarkMode()" class="flex-shrink-0 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition text-yellow-500"><i id="themeIcon" class="ph ph-sun text-xl"></i></button>
+                    
+                    <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1 flex-shrink-0"></div>
+                    
+                    <button onclick="logout()" class="flex-shrink-0 flex items-center gap-2 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 rounded text-xs sm:text-sm font-medium transition whitespace-nowrap">
+                        <i class="ph ph-sign-out text-lg"></i> <span class="hidden sm:inline">Keluar</span>
+                    </button>
+                </div>
             </div>
         </header>
 
-        <div class="bg-white dark:bg-dark-card rounded-xl border border-gray-200 dark:border-gray-700 p-5 mb-6 shadow-sm">
-            <div class="flex justify-between items-center mb-2">
+        <div class="bg-white dark:bg-dark-card rounded-xl border border-gray-200 dark:border-gray-700 p-4 sm:p-5 mb-6 shadow-sm">
+            <div class="flex justify-between items-end mb-2">
                 <div>
-                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-300 block">Progres Saya</span>
-                    <span class="text-xs text-gray-500 dark:text-gray-400" id="progressText">Menghitung data...</span>
+                    <span class="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-0.5">Progres Saya</span>
+                    <span class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400" id="progressText">Menghitung data...</span>
                 </div>
-                <span class="text-2xl font-bold text-primary dark:text-blue-400" id="progressPercent">0%</span>
+                <span class="text-xl sm:text-2xl font-bold text-primary dark:text-blue-400" id="progressPercent">0%</span>
             </div>
-            <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+            <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5 sm:h-3 overflow-hidden">
                 <div id="progressBar" class="bg-blue-600 dark:bg-blue-500 h-full rounded-full" style="width: 0%"></div>
             </div>
         </div>
-        <div class="mb-6 space-y-3">
-        <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
-                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider mr-1">Status:</span>
-                <button onclick="setStatusFilter('all')" class="status-btn active px-3 py-1 rounded-full border border-gray-200 dark:border-gray-700 text-xs font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition" data-status="all">Semua</button>
-                <button onclick="setStatusFilter('completed')" class="status-btn px-3 py-1 rounded-full border border-green-200 dark:border-green-800 text-xs font-medium bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 hover:bg-green-100 transition" data-status="completed">Selesai</button>
-                <button onclick="setStatusFilter('pending')" class="status-btn px-3 py-1 rounded-full border border-red-200 dark:border-red-800 text-xs font-medium bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 hover:bg-red-100 transition" data-status="pending">Belum</button>
-            </div>        
+
+        <div class="space-y-4 mb-6">
+            <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider mr-1 flex-shrink-0">Status:</span>
+                <button onclick="setStatusFilter('all')" class="status-btn active px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-xs font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition flex-shrink-0" data-status="all">Semua</button>
+                <button onclick="setStatusFilter('completed')" class="status-btn px-3 py-1.5 rounded-full border border-green-200 dark:border-green-800 text-xs font-medium bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 hover:bg-green-100 transition flex-shrink-0" data-status="completed">Selesai</button>
+                <button onclick="setStatusFilter('pending')" class="status-btn px-3 py-1.5 rounded-full border border-red-200 dark:border-red-800 text-xs font-medium bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 hover:bg-red-100 transition flex-shrink-0" data-status="pending">Belum</button>
+            </div>
+
+            <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
+                <button onclick="setCategoryFilter('all')" class="filter-btn active px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-xs sm:text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap flex-shrink-0" data-filter="all">Semua</button>
+                <button onclick="setCategoryFilter('kelompok')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-xs sm:text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap flex-shrink-0" data-filter="kelompok">Kelompok</button>
+                <button onclick="setCategoryFilter('vclass')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-xs sm:text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap flex-shrink-0" data-filter="vclass">VClass</button>
+                <button onclick="setCategoryFilter('praktikum')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-xs sm:text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap flex-shrink-0" data-filter="praktikum">Praktikum</button>
+                <button onclick="setCategoryFilter('ilab')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-xs sm:text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap flex-shrink-0" data-filter="ilab">iLab</button>
+                <button onclick="setCategoryFilter('mandiri')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-xs sm:text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap flex-shrink-0" data-filter="mandiri">Mandiri</button>
+            </div>
         </div>
 
-        <div class="flex flex-wrap gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
-            <button onclick="setCategoryFilter('all')" class="filter-btn active px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="all">Semua</button>
-            <button onclick="setCategoryFilter('kelompok')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="kelompok">Kelompok</button>
-            <button onclick="setCategoryFilter('vclass')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="vclass">VClass</button>
-            <button onclick="setCategoryFilter('praktikum')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="praktikum">Praktikum</button>
-            <button onclick="setCategoryFilter('ilab')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="ilab">iLab</button>
-            <button onclick="setCategoryFilter('mandiri')" class="filter-btn px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap" data-filter="mandiri">Mandiri</button>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-            <div class="bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700 p-4 rounded-xl flex items-center justify-between shadow-sm">
-                <div><p class="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wide">Total Tugas</p><h2 class="text-2xl font-bold text-gray-800 dark:text-white mt-1" id="totalCount">0</h2></div>
-                <div class="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-600 dark:text-blue-400"><i class="ph ph-books text-2xl"></i></div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-8">
+            <div class="bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700 p-3 sm:p-4 rounded-xl flex items-center justify-between shadow-sm col-span-2 sm:col-span-1">
+                <div><p class="text-gray-500 dark:text-gray-400 text-[10px] sm:text-xs font-medium uppercase tracking-wide">Total Tugas</p><h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white mt-1" id="totalCount">0</h2></div>
+                <div class="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-600 dark:text-blue-400"><i class="ph ph-books text-xl sm:text-2xl"></i></div>
             </div>
-            <div class="bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700 p-4 rounded-xl flex items-center justify-between shadow-sm">
-                <div><p class="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wide">Selesai</p><h2 class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1" id="doneCount">0</h2></div>
-                <div class="p-2 bg-green-50 dark:bg-green-900/20 rounded-lg text-green-600 dark:text-green-400"><i class="ph ph-check-circle text-2xl"></i></div>
+            <div class="bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700 p-3 sm:p-4 rounded-xl flex items-center justify-between shadow-sm">
+                <div><p class="text-gray-500 dark:text-gray-400 text-[10px] sm:text-xs font-medium uppercase tracking-wide">Selesai</p><h2 class="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400 mt-1" id="doneCount">0</h2></div>
+                <div class="p-2 bg-green-50 dark:bg-green-900/20 rounded-lg text-green-600 dark:text-green-400"><i class="ph ph-check-circle text-xl sm:text-2xl"></i></div>
             </div>
-            <div class="bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700 p-4 rounded-xl flex items-center justify-between shadow-sm">
-                <div><p class="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wide">Belum</p><h2 class="text-2xl font-bold text-red-600 dark:text-red-400 mt-1" id="pendingCount">0</h2></div>
-                <div class="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg text-red-600 dark:text-red-400"><i class="ph ph-clock text-2xl"></i></div>
+            <div class="bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700 p-3 sm:p-4 rounded-xl flex items-center justify-between shadow-sm">
+                <div><p class="text-gray-500 dark:text-gray-400 text-[10px] sm:text-xs font-medium uppercase tracking-wide">Belum</p><h2 class="text-xl sm:text-2xl font-bold text-red-600 dark:text-red-400 mt-1" id="pendingCount">0</h2></div>
+                <div class="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg text-red-600 dark:text-red-400"><i class="ph ph-clock text-xl sm:text-2xl"></i></div>
             </div>
         </div>
 
         <div id="loading" class="hidden"><div class="loader"></div></div>
-        <div id="taskContainer" class="grid gap-4 transition-all duration-300"></div>
+        
+        <div id="taskContainer" class="grid gap-3 sm:gap-4 transition-all duration-300"></div>
 
     </div>
 
-    <div id="profileModal" class="fixed inset-0 z-[1000] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 transition-opacity duration-300" onclick="closeProfileModal()">
-        <div class="relative bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-2xl max-w-md w-full mx-4 transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
-            
+    <div id="profileModal" class="fixed inset-0 z-[1000] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 transition-opacity duration-300 p-4" onclick="closeProfileModal()">
+        <div class="relative bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-2xl w-full max-w-md transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
             <div class="flex justify-between items-start mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
                 <h3 class="text-xl font-bold text-gray-800 dark:text-white">Profile Saya</h3>
                 <button onclick="closeProfileModal()" class="text-gray-500 hover:text-red-500 transition"><i class="ph ph-x text-xl"></i></button>
@@ -201,44 +212,46 @@
         </div>
     </div>
 
-    <div id="universalModal" class="fixed inset-0 z-[999] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 transition-opacity duration-300" onclick="closeModal()">
-        <div class="relative bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[85vh] flex flex-col overflow-hidden transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-center mb-4 border-b border-gray-200 dark:border-gray-700 pb-3">
-                <h3 id="modalTitle" class="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2"></h3>
+    <div id="universalModal" class="fixed inset-0 z-[999] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 transition-opacity duration-300 p-4" onclick="closeModal()">
+        <div class="relative bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-200 dark:border-gray-700 pb-3 flex-shrink-0">
+                <h3 id="modalTitle" class="text-lg sm:text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2"></h3>
                 <button onclick="closeModal()" class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition"><i class="ph ph-x text-lg"></i></button>
             </div>
-            <div class="overflow-y-auto pr-2 custom-scrollbar">
+            <div class="overflow-y-auto pr-2 custom-scrollbar flex-grow">
                 <img id="modalImage" src="" alt="Preview" class="hidden w-full h-auto object-contain rounded-lg shadow-sm">
                 <div id="modalText" class="hidden text-gray-700 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-wrap bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg border border-gray-100 dark:border-gray-700"></div>
             </div>
         </div>
     </div>
 
-    <div id="classModal" class="fixed inset-0 z-[999] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 transition-opacity duration-300" onclick="closeClassModal()">
-        <div class="relative bg-white dark:bg-gray-800 p-0 rounded-xl shadow-2xl max-w-3xl w-full mx-4 max-h-[85vh] flex flex-col overflow-hidden transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
+    <div id="classModal" class="fixed inset-0 z-[999] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 transition-opacity duration-300 p-2 sm:p-4" onclick="closeClassModal()">
+        <div class="relative bg-white dark:bg-gray-800 p-0 rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
             
-            <div class="p-5 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800">
-                <h3 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                    <i class="ph ph-chart-bar-horizontal text-blue-500"></i> Progres Pengerjaan Kelas
+            <div class="p-4 sm:p-5 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800 flex-shrink-0">
+                <h3 class="text-base sm:text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                    <i class="ph ph-chart-bar-horizontal text-blue-500"></i> Progres Kelas
                 </h3>
                 <button onclick="closeClassModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition">
                     <i class="ph ph-x text-xl"></i>
                 </button>
             </div>
 
-            <div class="overflow-y-auto custom-scrollbar p-5">
-                <table class="w-full text-sm text-left border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+            <div class="overflow-y-auto custom-scrollbar p-0 sm:p-5 flex-grow">
+                <div class="block sm:hidden">
+                    <div id="mobileClassProgressBody" class="space-y-3 p-3"></div>
+                </div>
+
+                <table class="hidden sm:table w-full text-sm text-left border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                     <thead class="bg-gray-100 dark:bg-gray-900 uppercase text-xs text-gray-600 dark:text-gray-300 font-semibold">
                         <tr>
                             <th class="px-6 py-4">Mahasiswa</th>
-                            <th class="px-6 py-4">Progress Tugas</th>
+                            <th class="px-6 py-4">Progress</th>
                             <th class="px-6 py-4 text-right">Status</th>
                             <th class="px-6 py-4 text-center">Detail</th>
                         </tr>
                     </thead>
-                    <tbody id="classProgressBody" class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
-                        <tr><td colspan="4" class="text-center py-6 text-gray-500">Memuat data...</td></tr>
-                    </tbody>
+                    <tbody id="classProgressBody" class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800"></tbody>
                 </table>
             </div>
         </div>
@@ -254,7 +267,7 @@
         function setCategoryFilter(category) {
             activeCategory = category;
             document.querySelectorAll('.filter-btn').forEach(btn => {
-                if(btn.dataset.category === category) btn.classList.add('active');
+                if(btn.dataset.filter === category) btn.classList.add('active'); // Fixed dataset property name match
                 else btn.classList.remove('active');
             });
             renderTasks();
@@ -300,21 +313,13 @@
             btnGrid.classList.remove(...activeClass);
             if (currentLayout === 'list') {
                 btnList.classList.add(...activeClass);
-                container.className = 'flex flex-col gap-4';
+                container.className = 'flex flex-col gap-3 sm:gap-4';
             } else {
                 btnGrid.classList.add(...activeClass);
-                container.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+                container.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6';
             }
         }
 
-        function setFilter(filter) {
-            activeFilter = filter;
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                if(btn.dataset.filter === filter) btn.classList.add('active');
-                else btn.classList.remove('active');
-            });
-            renderTasks();
-        }
 
         async function loadDashboard() {
             const loader = document.getElementById('loading');
@@ -346,7 +351,7 @@
                         const btn = document.createElement('a');
                         btn.id = 'btnEditor';
                         btn.href = '/editor-tugas.html';
-                        btn.className = 'p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition text-purple-600 dark:text-purple-400 mr-2';
+                        btn.className = 'p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition text-purple-600 dark:text-purple-400 mr-2 flex items-center gap-2';
                         btn.title = "Mode Editor";
                         btn.innerHTML = '<i class="ph ph-pencil-simple-line text-xl"></i>';
                         container.appendChild(btn);
@@ -354,8 +359,22 @@
                 }
             } catch (e) { console.error(e); }
         }
+
+        async function updateHeaderAvatar() {
+            try {
+                const res = await fetch('/api/student/profile');
+                const user = await res.json();
+                const avatar = user.fotoProfile || `./img/splash2.jpg`;
+                document.getElementById('headerAvatar').src = avatar;
+                const npmBadge = document.getElementById('displayNpm');
+                if (user.npm) {
+                    npmBadge.innerText = user.npm;
+                    npmBadge.classList.remove('hidden'); 
+                }
+            } catch(e) { console.error("Gagal load info header", e); }
+        }
         async function openProfileModal() {
-            const modal = document.getElementById('profileModal');
+             const modal = document.getElementById('profileModal');
             modal.classList.remove('hidden');
             setTimeout(() => {
                 modal.classList.remove('opacity-0');
@@ -378,7 +397,6 @@
 
             } catch (e) { console.error("Gagal load profile", e); }
         }
-
         function closeProfileModal() {
             const modal = document.getElementById('profileModal');
             modal.classList.add('opacity-0');
@@ -386,9 +404,8 @@
             modal.firstElementChild.classList.add('scale-95');
             setTimeout(() => modal.classList.add('hidden'), 300);
         }
-
         async function uploadProfilePic(input) {
-            const file = input.files[0];
+             const file = input.files[0];
             if(!file) return;
 
             const imgEl = document.getElementById('previewProfile');
@@ -416,7 +433,6 @@
                 imgEl.style.opacity = '1';
             }
         }
-
         document.getElementById('profileForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const payload = {
@@ -445,23 +461,6 @@
                 Swal.fire('Gagal', 'Gagal menyimpan profile', 'error');
             }
         });
-
-        async function updateHeaderAvatar() {
-            try {
-                const res = await fetch('/api/student/profile');
-                const user = await res.json();
-                const avatar = user.fotoProfile || `./img/splash2.jpg`;
-                document.getElementById('headerAvatar').src = avatar;
-                const npmBadge = document.getElementById('displayNpm');
-                if (user.npm) {
-                    npmBadge.innerText = user.npm;
-                    npmBadge.classList.remove('hidden'); 
-                }
-
-            } catch(e) {
-                console.error("Gagal load info header", e);
-            }
-        }
 
         function renderTasks() {
             const container = document.getElementById('taskContainer');
@@ -514,19 +513,58 @@
                     t.Mandiri ? {l:'Mandiri', c:'orange'} : null,
                     t.praktikum ? {l:'Praktikum', c:'pink'} : null,
                     t.ilab ? {l:'iLab', c:'teal'} : null,
-                ].filter(Boolean).map(tag => `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-${tag.c}-50 text-${tag.c}-700 border border-${tag.c}-100 dark:bg-${tag.c}-900/30 dark:text-${tag.c}-300 dark:border-${tag.c}-800">${tag.l}</span>`).join('');
+                ].filter(Boolean).map(tag => `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-${tag.c}-50 text-${tag.c}-700 border border-${tag.c}-100 dark:bg-${tag.c}-900/30 dark:text-${tag.c}-300 dark:border-${tag.c}-800">${tag.l}</span>`).join(''); 
                 const statusClass = t.isCompleted ? 'border-l-4 border-green-500 opacity-90' : 'border-l-4 border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500';
                 const textColor = t.isCompleted ? 'text-gray-400 line-through dark:text-gray-500' : 'text-gray-800 dark:text-gray-100';
-                const imgBtn = t.UrlGambar ? `<button onclick="openModal('image', '${t.UrlGambar}')" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1.5 text-xs font-semibold bg-blue-50 dark:bg-blue-900/20 px-2.5 py-1.5 rounded-lg transition border border-blue-100 dark:border-blue-800/50"><i class="ph ph-image text-lg"></i> Gambar</button>` : '';
+                const imgBtn = t.UrlGambar ? `<button onclick="openModal('image', '${t.UrlGambar}')" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1.5 text-xs font-semibold bg-blue-50 dark:bg-blue-900/20 px-2 sm:px-2.5 py-1.5 rounded-lg transition border border-blue-100 dark:border-blue-800/50"><i class="ph ph-image text-lg"></i> <span class="hidden xs:inline">Gambar</span></button>` : '';
                 const hasNote = t.Noted && t.Noted.trim() !== '-' && t.Noted.trim() !== '';
                 const safeNote = t.Noted ? t.Noted.replace(/'/g, "\\'").replace(/"/g, '&quot;') : '';
-                const noteBtn = hasNote ? `<button onclick="openModal('text', '${safeNote}')" class="text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 flex items-center gap-1.5 text-xs font-semibold bg-purple-50 dark:bg-purple-900/20 px-2.5 py-1.5 rounded-lg transition border border-purple-100 dark:border-purple-800/50"><i class="ph ph-info text-lg"></i> Info</button>` : '';
+                const noteBtn = hasNote ? `<button onclick="openModal('text', '${safeNote}')" class="text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 flex items-center gap-1.5 text-xs font-semibold bg-purple-50 dark:bg-purple-900/20 px-2 sm:px-2.5 py-1.5 rounded-lg transition border border-purple-100 dark:border-purple-800/50"><i class="ph ph-info text-lg"></i> <span class="hidden xs:inline">Info</span></button>` : '';
                 const actionButtons = `<div class="flex gap-2">${imgBtn}${noteBtn}</div>`;
                 let html = '';
                 if (currentLayout === 'list') {
-                    html = `<div class="task-card ${statusClass} relative p-4 rounded-xl bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row gap-4 items-start sm:items-center"><div class="flex-shrink-0 pt-1 sm:pt-0"><input type="checkbox" class="custom-checkbox text-green-500 border-gray-300 dark:border-gray-500" onchange="toggleTask(${t.id}, this.checked)" ${t.isCompleted ? 'checked' : ''}></div><div class="flex-grow w-full"><div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-1"><h3 class="font-bold text-lg ${textColor}">${t.matakuliah}</h3><div class="flex gap-2 items-center self-start sm:self-auto">${actionButtons} <span class="px-2.5 py-0.5 rounded text-xs font-medium ${badgeClass}">${badgeText}</span></div></div><div class="flex flex-wrap gap-2 items-center mb-2"><span class="text-sm font-semibold text-gray-700 dark:text-gray-300">${t.Namatugas}</span><span class="text-xs text-gray-400">| ${deadlineDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}</span></div><div class="flex gap-2 mb-3">${tags}</div><input type="text" value="${t.catatan || ''}" placeholder="Tulis catatan..." class="w-full bg-transparent border-b border-gray-200 dark:border-gray-700 text-sm py-1 text-gray-600 dark:text-gray-300 focus:outline-none focus:border-blue-500 transition-colors" onblur="saveNote(${t.id}, this.value)"></div></div>`;
+                    // Optimized List Layout for Mobile
+                    html = `<div class="task-card ${statusClass} relative p-3 sm:p-4 rounded-xl bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center">
+                        <div class="flex-shrink-0 pt-1 sm:pt-0 self-start sm:self-center">
+                            <input type="checkbox" class="custom-checkbox text-green-500 border-gray-300 dark:border-gray-500" onchange="toggleTask(${t.id}, this.checked)" ${t.isCompleted ? 'checked' : ''}>
+                        </div>
+                        <div class="flex-grow w-full">
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-1">
+                                <h3 class="font-bold text-base sm:text-lg ${textColor}">${t.matakuliah}</h3>
+                                <div class="flex gap-2 items-center self-start sm:self-auto">
+                                    ${actionButtons} 
+                                    <span class="px-2.5 py-0.5 rounded text-xs font-medium ${badgeClass} whitespace-nowrap">${badgeText}</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap gap-2 items-center mb-2">
+                                <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">${t.Namatugas}</span>
+                                <span class="text-xs text-gray-400 flex items-center gap-1"><i class="ph ph-calendar"></i> ${deadlineDate.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
+                            </div>
+                            <div class="flex gap-2 mb-3">${tags}</div>
+                            <input type="text" value="${t.catatan || ''}" placeholder="Tulis catatan..." class="w-full bg-transparent border-b border-gray-200 dark:border-gray-700 text-sm py-1 text-gray-600 dark:text-gray-300 focus:outline-none focus:border-blue-500 transition-colors" onblur="saveNote(${t.id}, this.value)">
+                        </div>
+                    </div>`;
                 } else {
-                    html = `<div class="task-card ${statusClass} flex flex-col justify-between h-full p-5 rounded-xl bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700"><div class="flex justify-between items-start mb-3"><input type="checkbox" class="custom-checkbox text-green-500 border-gray-300 dark:border-gray-500" onchange="toggleTask(${t.id}, this.checked)" ${t.isCompleted ? 'checked' : ''}><span class="px-2.5 py-0.5 rounded text-xs font-medium ${badgeClass}">${badgeText}</span></div><div class="mb-4"><div class="flex justify-between items-start mb-1"><h3 class="font-bold text-lg leading-tight ${textColor}">${t.matakuliah}</h3>${actionButtons}</div><p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">${t.Namatugas}</p><p class="text-xs text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-1"><i class="ph ph-calendar"></i> ${deadlineDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</p><div class="flex flex-wrap gap-2">${tags}</div></div><div class="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700 flex items-center gap-2 text-gray-400"><i class="ph ph-pencil-simple text-sm"></i><input type="text" value="${t.catatan || ''}" placeholder="Catatan..." class="w-full bg-transparent text-xs focus:outline-none text-gray-600 dark:text-gray-300" onblur="saveNote(${t.id}, this.value)"></div></div>`;
+                    // Grid Layout matches previous code
+                    html = `<div class="task-card ${statusClass} flex flex-col justify-between h-full p-4 sm:p-5 rounded-xl bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700">
+                        <div class="flex justify-between items-start mb-3">
+                            <input type="checkbox" class="custom-checkbox text-green-500 border-gray-300 dark:border-gray-500" onchange="toggleTask(${t.id}, this.checked)" ${t.isCompleted ? 'checked' : ''}>
+                            <span class="px-2.5 py-0.5 rounded text-xs font-medium ${badgeClass}">${badgeText}</span>
+                        </div>
+                        <div class="mb-4">
+                            <div class="flex justify-between items-start mb-1 gap-2">
+                                <h3 class="font-bold text-base sm:text-lg leading-tight ${textColor}">${t.matakuliah}</h3>
+                                <div class="flex-shrink-0">${actionButtons}</div>
+                            </div>
+                            <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">${t.Namatugas}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-1"><i class="ph ph-calendar"></i> ${deadlineDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                            <div class="flex flex-wrap gap-2">${tags}</div>
+                        </div>
+                        <div class="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700 flex items-center gap-2 text-gray-400">
+                            <i class="ph ph-pencil-simple text-sm"></i>
+                            <input type="text" value="${t.catatan || ''}" placeholder="Catatan..." class="w-full bg-transparent text-xs focus:outline-none text-gray-600 dark:text-gray-300" onblur="saveNote(${t.id}, this.value)">
+                        </div>
+                    </div>`;
                 }
                 container.insertAdjacentHTML('beforeend', html);
             });
@@ -554,14 +592,8 @@
         }
         async function openClassModal() {
             const modal = document.getElementById('classModal');
-            const tbody = document.getElementById('classProgressBody');
-             const thead = document.querySelector('#classModal thead tr');
-            if (thead.children.length === 3) { 
-                const th = document.createElement('th');
-                th.className = "px-4 py-3 text-center rounded-tr-lg";
-                th.innerText = "Detail";
-                thead.appendChild(th);
-            }
+            const mobileBody = document.getElementById('mobileClassProgressBody');
+            const desktopBody = document.getElementById('classProgressBody');
             modal.classList.remove('hidden');
             setTimeout(() => {
                 modal.firstElementChild.classList.remove('scale-95');
@@ -572,7 +604,8 @@
             try {
                 const res = await fetch('/api/student/class-progress');
                 const data = await res.json();
-                tbody.innerHTML = '';
+                mobileBody.innerHTML = '';
+                desktopBody.innerHTML = '';
                 
                 data.forEach(u => {
                     let color = 'bg-red-500';
@@ -580,8 +613,32 @@
                     if(u.percent === 100) color = 'bg-green-500';
                     let statusBadge = '<span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs font-semibold">Proses</span>';
                     if(u.percent === 100) statusBadge = '<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-semibold">Selesai</span>';
-
-                    const row = `
+                    const mobileCard = `
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-100 dark:border-gray-600">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="font-medium text-gray-900 dark:text-white">
+                                    ${u.displayName}
+                                    <span class="text-xs text-gray-400 block font-mono mt-0.5">${u.npm}</span>
+                                </div>
+                                <button onclick="viewStudentDetail('${u.npm}')" class="text-blue-600 dark:text-blue-400 p-1">
+                                    <i class="ph ph-eye text-xl"></i>
+                                </button>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="flex-grow">
+                                    <div class="flex justify-between mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+                                        <span>${u.completed}/${u.total}</span>
+                                        <span>${u.percent}%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-600 overflow-hidden">
+                                        <div class="${color} h-2 rounded-full" style="width: ${u.percent}%"></div>
+                                    </div>
+                                </div>
+                                <div>${statusBadge}</div>
+                            </div>
+                        </div>`;
+                    mobileBody.insertAdjacentHTML('beforeend', mobileCard);
+                    const desktopRow = `
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors border-b dark:border-gray-700">
                             <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
                                 ${u.displayName}
@@ -606,14 +663,22 @@
                             </td>
                         </tr>
                     `;
-                    tbody.insertAdjacentHTML('beforeend', row);
+                    desktopBody.insertAdjacentHTML('beforeend', desktopRow);
                 });
              } catch (e) {
                 console.error(e);
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-red-500">Gagal memuat data.</td></tr>';
+                mobileBody.innerHTML = '<div class="text-center text-red-500">Gagal memuat data.</div>';
+                desktopBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-red-500">Gagal memuat data.</td></tr>';
             }
         }
-
+        
+        function closeClassModal() {
+            const modal = document.getElementById('classModal');
+            modal.classList.add('opacity-0');
+            modal.firstElementChild.classList.remove('scale-100');
+            modal.firstElementChild.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
         async function viewStudentDetail(npm) {
             try {
                 Swal.fire({ title: 'Memuat...', didOpen: () => Swal.showLoading() });
@@ -670,15 +735,6 @@
                 Swal.fire('Error', 'Gagal ambil detail', 'error');
             }        
         }
-
-        function closeClassModal() {
-            const modal = document.getElementById('classModal');
-            modal.classList.add('opacity-0');
-            modal.firstElementChild.classList.remove('scale-100');
-            modal.firstElementChild.classList.add('scale-95');
-            setTimeout(() => modal.classList.add('hidden'), 300);
-        }
-
         function openModal(type, content) {
             const modal = document.getElementById('universalModal');
             const titleEl = document.getElementById('modalTitle');

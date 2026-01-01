@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  api:
+    build: .
+    container_name: Ka14-reminderWeb
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./dev.db:/app/dev.db
+      - ./prisma:/app/prisma
+    environment:
+      - NODE_ENV=production
