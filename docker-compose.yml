@@ -11,3 +11,5 @@ services:
       - ./prisma:/app/prisma
     environment:
       - NODE_ENV=production
+      - TZ=Asia/Jakarta
+    restart: unless-stopped
