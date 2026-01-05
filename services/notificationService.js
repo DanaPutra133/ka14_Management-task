@@ -130,10 +130,10 @@ const processDiscordReminders = async (type) => {
   // ======= Discord Embed Message =======
   // yang akan tampil di pesan discord
   const map = {
-    // "H-3": { color: 0xffd93d, title: "🔔 REMINDER H-3 DEADLINE TUGAS! 🔔" },
-    // "H-1": { color: 0xff4d4d, title: "🚨 FINAL REMINDER H-1 DEADLINE TUGAS! 🚨", }, 
-    // H: { color: 0x4caf50, title: "✅ HARI-H DEADLINE TUGAS! ✅" },
-    H: { color: 0x4caf50, title: "✅ Jadwal UTS Hari ini!  ✅" },
+    "H-3": { color: 0xffd93d, title: "🔔 REMINDER H-3 DEADLINE TUGAS! 🔔" },
+    "H-1": { color: 0xff4d4d, title: "🚨 FINAL REMINDER H-1 DEADLINE TUGAS! 🚨", }, 
+    H: { color: 0x4caf50, title: "✅ HARI-H DEADLINE TUGAS! ✅" },
+    // H: { color: 0x4caf50, title: "✅ Jadwal UTS Hari ini!  ✅" },
   };
 
     const s = map[type];
