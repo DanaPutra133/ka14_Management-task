@@ -1,4 +1,7 @@
 const maintenanceMiddleware = (req, res, next) => {
+  if (req.path.startsWith('/tugas/mahasiswa')) {
+    return next();
+  }
   if (process.env.MODE === "maintenance") {
     let imgUrl;
     switch (process.env.STATUS) {
