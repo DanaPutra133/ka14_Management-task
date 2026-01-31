@@ -37,7 +37,7 @@ const maintenanceMiddleware = (req, res, next) => {
                 </style>
             </head>
             <body>
-                <img src="${imgUrl}" alt="maintenance mode">
+                <img src="https://uploader.danafxc.my.id/images/f0c25df3-f696-48af-a162-e4b1236dba05.png" alt="maintenance mode">
             </body>
             </html>
         `;
