@@ -44,7 +44,7 @@ const maintenanceMiddleware = (req, res, next) => {
             </html>
         `;
 
-    return res.status(503).send(htmlContent);
+    return res.send(htmlContent);
   }
  console.log(
    `Server dalam mode maintenance (${process.env.STATUS}). Menampilkan halaman maintenance`,
