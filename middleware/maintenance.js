@@ -1,4 +1,8 @@
 const maintenanceMiddleware = (req, res, next) => {
+  if (req.path.startsWith('/tugas/mahasiswa')) {
+    return next();
+  }
+  
   if (process.env.MODE === "maintenance") {
     let imgUrl;
     switch (process.env.STATUS) {
@@ -12,6 +16,7 @@ const maintenanceMiddleware = (req, res, next) => {
         imgUrl = "https://uploader.danafxc.my.id/images/6519405f-9dfd-42a9-9046-4dadc450c5cb.jpg";
         break;
     }
+   
     const htmlContent = `
             <!DOCTYPE html>
             <html lang="id">
@@ -41,7 +46,9 @@ const maintenanceMiddleware = (req, res, next) => {
 
     return res.status(503).send(htmlContent);
   }
-
+ console.log(
+   `Server dalam mode maintenance (${process.env.STATUS}). Menampilkan halaman maintenance`,
+ );
   next();
 };
 
