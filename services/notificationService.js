@@ -132,10 +132,10 @@ const processDiscordReminders = async (type) => {
   const map = {
     // "H-3": { color: 0xffd93d, title: "🔔 REMINDER H-3 DEADLINE TUGAS! 🔔" },
     // "H-1": { color: 0xff4d4d, title: "🚨 FINAL REMINDER H-1 DEADLINE TUGAS! 🚨", },
-    "H-1": { color: 0xff4d4d, title: "⚠️ JADWAL UJIAN UTAMA H-1 JANGAN SAMPAI LUPA! ⚠️" },
+    "H-1": { color: 0xff4d4d, title: "⚠️ JADWAL UAS H-1 JANGAN SAMPAI LUPA! ⚠️" },
     // H: { color: 0x4caf50, title: "✅ HARI-H DEADLINE TUGAS! ✅" },
     // H: { color: 0x4caf50, title: "✅ Jadwal UTS Hari ini!  ✅" },
-    H: { color: 0x4caf50, title: "⚠️ JADWAL UJIAN UTAMA HARI INI! ⚠️" },
+    H: { color: 0x4caf50, title: "⚠️ JADWAL UAS HARI INI! ⚠️" },
   };
 
     const s = map[type];
