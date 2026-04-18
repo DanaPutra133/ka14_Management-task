@@ -25,9 +25,9 @@ const initCronJobs = () => {
     { timezone: cronTimezone }
   );
   cron.schedule(
-    "0 7 * * *",
+    "0 6 * * *",
     async () => {
-      console.log("Cron 07:00 Triggered");
+      console.log("Cron 06:00 Triggered");
       await notifService.processPushReminders("H");
       await notifService.processDiscordReminders("H");
     },
